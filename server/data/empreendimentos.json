@@ -1,0 +1,134 @@
+[
+  {
+    "id": 1,
+    "nome": "Residencial Vila Eduardo",
+    "descricao": "Residencial Vila Eduardo é um empreendimento residencial da Rocha Costa em Petrolina/PE, entregue com acabamento de qualidade e infraestrutura completa.",
+    "diferenciais": [
+      "Equipe própria de obra",
+      "Documentação regularizada",
+      "Acabamento de qualidade Rocha Costa"
+    ],
+    "localizacao": {
+      "lat": -9.386,
+      "lng": -40.5075
+    },
+    "status": "Entregue",
+    "ano": 2024,
+    "total_unidades": 48,
+    "imagens": [
+      "https://picsum.photos/seed/obra1/900/600",
+      "https://picsum.photos/seed/obra1b/900/600",
+      "https://picsum.photos/seed/obra1c/900/600"
+    ]
+  },
+  {
+    "id": 2,
+    "nome": "Condomínio Areia Branca",
+    "descricao": "Condomínio Areia Branca é um empreendimento residencial da Rocha Costa em Petrolina/PE, entregue com acabamento de qualidade e infraestrutura completa.",
+    "diferenciais": [
+      "Equipe própria de obra",
+      "Documentação regularizada",
+      "Acabamento de qualidade Rocha Costa"
+    ],
+    "localizacao": {
+      "lat": -9.3921,
+      "lng": -40.4988
+    },
+    "status": "Entregue",
+    "ano": 2023,
+    "total_unidades": 32,
+    "imagens": [
+      "https://picsum.photos/seed/obra2/900/600",
+      "https://picsum.photos/seed/obra2b/900/600",
+      "https://picsum.photos/seed/obra2c/900/600"
+    ]
+  },
+  {
+    "id": 3,
+    "nome": "Residencial Padre Cícero",
+    "descricao": "Residencial Padre Cícero é um empreendimento residencial da Rocha Costa em Petrolina/PE, entregue com acabamento de qualidade e infraestrutura completa.",
+    "diferenciais": [
+      "Equipe própria de obra",
+      "Documentação regularizada",
+      "Acabamento de qualidade Rocha Costa"
+    ],
+    "localizacao": {
+      "lat": -9.3799,
+      "lng": -40.5102
+    },
+    "status": "Entregue",
+    "ano": 2022,
+    "total_unidades": 60,
+    "imagens": [
+      "https://picsum.photos/seed/obra3/900/600",
+      "https://picsum.photos/seed/obra3b/900/600",
+      "https://picsum.photos/seed/obra3c/900/600"
+    ]
+  },
+  {
+    "id": 4,
+    "nome": "Loteamento Cidade Universitária",
+    "descricao": "Loteamento Cidade Universitária é um empreendimento residencial da Rocha Costa em Petrolina/PE, entregue com acabamento de qualidade e infraestrutura completa.",
+    "diferenciais": [
+      "Equipe própria de obra",
+      "Documentação regularizada",
+      "Acabamento de qualidade Rocha Costa"
+    ],
+    "localizacao": {
+      "lat": -9.3654,
+      "lng": -40.5566
+    },
+    "status": "Entregue",
+    "ano": 2021,
+    "total_unidades": 120,
+    "imagens": [
+      "https://picsum.photos/seed/obra4/900/600",
+      "https://picsum.photos/seed/obra4b/900/600",
+      "https://picsum.photos/seed/obra4c/900/600"
+    ]
+  },
+  {
+    "id": 5,
+    "nome": "Residencial Angical",
+    "descricao": "Residencial Angical é um empreendimento residencial da Rocha Costa em Petrolina/PE, entregue com acabamento de qualidade e infraestrutura completa.",
+    "diferenciais": [
+      "Equipe própria de obra",
+      "Documentação regularizada",
+      "Acabamento de qualidade Rocha Costa"
+    ],
+    "localizacao": {
+      "lat": -9.4187,
+      "lng": -40.4795
+    },
+    "status": "Entregue",
+    "ano": 2020,
+    "total_unidades": 40,
+    "imagens": [
+      "https://picsum.photos/seed/obra5/900/600",
+      "https://picsum.photos/seed/obra5b/900/600",
+      "https://picsum.photos/seed/obra5c/900/600"
+    ]
+  },
+  {
+    "id": 6,
+    "nome": "Condomínio Jardim Amazonas",
+    "descricao": "Condomínio Jardim Amazonas é um empreendimento residencial da Rocha Costa em Petrolina/PE, entregue com acabamento de qualidade e infraestrutura completa.",
+    "diferenciais": [
+      "Equipe própria de obra",
+      "Documentação regularizada",
+      "Acabamento de qualidade Rocha Costa"
+    ],
+    "localizacao": {
+      "lat": -9.3775,
+      "lng": -40.4901
+    },
+    "status": "Entregue",
+    "ano": 2019,
+    "total_unidades": 28,
+    "imagens": [
+      "https://picsum.photos/seed/obra6/900/600",
+      "https://picsum.photos/seed/obra6b/900/600",
+      "https://picsum.photos/seed/obra6c/900/600"
+    ]
+  }
+]

@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "nome": "João",
+    "empreendimento": "Nova Vida 02",
+    "estrelas": 5,
+    "texto": "Muito boa a casa, qualidade nota 1000. Sempre tive o sonho e agora foi realizado graças à Rocha Costa. Estou muito agradecido pelo atendimento e qualidade da casa."
+  },
+  {
+    "id": 2,
+    "nome": "Maria Eduarda Silva",
+    "empreendimento": "Residencial Vila Eduardo",
+    "estrelas": 5,
+    "texto": "Realizamos o sonho da casa própria com a Rocha Costa. Do primeiro contato até a entrega das chaves, fomos muito bem atendidos e o acabamento superou nossa expectativa."
+  },
+  {
+    "id": 3,
+    "nome": "João Paulo Barbosa",
+    "empreendimento": "Condomínio Areia Branca",
+    "estrelas": 5,
+    "texto": "Comprei na planta e acompanhei toda a obra. Prazo cumprido, comunicação transparente e suporte total na hora da documentação e financiamento."
+  },
+  {
+    "id": 4,
+    "nome": "Fernanda Costa Lima",
+    "empreendimento": "Residencial Padre Cícero",
+    "estrelas": 5,
+    "texto": "Equipe muito atenciosa, sempre disponível para tirar dúvidas. Recomendo a Rocha Costa para quem busca uma construtora séria em Petrolina."
+  },
+  {
+    "id": 5,
+    "nome": "Roberto Andrade",
+    "empreendimento": "Loteamento Cidade Universitária",
+    "estrelas": 4,
+    "texto": "Processo de compra do terreno foi rápido e sem burocracia. A equipe explicou cada etapa com muita clareza."
+  }
+]

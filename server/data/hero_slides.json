@@ -1,0 +1,29 @@
+[
+  {
+    "eyebrow": "construtora em petrolina",
+    "titulo": "slide",
+    "texto": "slide",
+    "imagem": "/img/uploads/1783359985-1328-8_vitrine_desk_1440x550px_roxo.webp",
+    "cta_texto": "clique aqui",
+    "cta_tipo": "imoveis",
+    "cta_valor": "",
+    "area_clicavel": {
+      "x": 54.2,
+      "y": 62.2,
+      "largura": 24,
+      "altura": 12.5
+    },
+    "id": 1
+  },
+  {
+    "eyebrow": "wdwadad",
+    "titulo": "wddwwddw",
+    "texto": "dddwwd",
+    "imagem": "/img/uploads/1783361058-1328-8_vitrine_desk_1440x550px_roxo.webp",
+    "cta_texto": "dwdwdw",
+    "cta_tipo": "imoveis",
+    "cta_valor": "",
+    "area_clicavel": null,
+    "id": 2
+  }
+]

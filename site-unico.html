@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rocha Costa Construtora | Construtora MCMV em Petrolina-PE</title>
+<meta name="description" content="Construtora em Petrolina-PE especializada em casas e empreendimentos residenciais, Minha Casa Minha Vida, com qualidade e prazo cumprido. Fale com a Rocha Costa.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   Rocha Costa — Site em arquivo único (sem backend)
+   Navy #001F3E / Red #E3052D
+   ========================================================= */
+:root {
+  --navy: #001F3E; --navy-light: #0A3760; --navy-dark: #001327;
+  --red: #E3052D; --red-dark: #B80423;
+  --white: #FFFFFF; --off-white: #F5F7FA;
+  --gray-100: #EEF1F5; --gray-300: #D3DAE3; --gray-500: #8A96A3; --gray-700: #4B5563;
+  --text: #16212E;
+  --font-heading: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', sans-serif;
+  --radius-sm: 14px; --radius: 22px; --radius-lg: 32px; --radius-pill: 980px;
+  --shadow: 0 20px 50px rgba(0, 31, 62, 0.09);
+  --shadow-lg: 0 30px 90px rgba(0, 31, 62, 0.16);
+  --container: 1180px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; font-family: var(--font-body); color: var(--text); background: var(--white); line-height: 1.6; -webkit-font-smoothing: antialiased; letter-spacing: -0.011em; }
+h1, h2, h3, h4 { font-family: var(--font-heading); color: var(--navy); line-height: 1.1; letter-spacing: -0.03em; margin: 0 0 .6em; }
+h1 { font-size: clamp(2.2rem, 4.4vw, 3.4rem); font-weight: 800; }
+h2 { font-size: clamp(1.7rem, 3vw, 2.3rem); font-weight: 800; }
+h3 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
+p { margin: 0 0 1em; color: var(--gray-700); }
+a { color: var(--red); text-decoration: none; }
+a:hover { text-decoration: underline; }
+img { max-width: 100%; display: block; }
+ul { padding-left: 1.2em; }
+.container { max-width: var(--container); margin: 0 auto; padding: 0 24px; }
+.section { padding: 72px 0; }
+.section--alt { background: var(--off-white); }
+.section--navy { background: var(--navy); color: var(--white); }
+.section--navy h2, .section--navy h3 { color: var(--white); }
+.section--navy p { color: var(--gray-300); }
+.eyebrow { display: inline-block; color: var(--red); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: .78rem; margin-bottom: .6em; }
+.section-head { max-width: 680px; margin-bottom: 40px; }
+.section-head.center { margin-left: auto; margin-right: auto; text-align: center; }
+.center { text-align: center; }
+.mt-0 { margin-top: 0; }
+.divider { height: 1px; background: var(--gray-100); margin: 40px 0; }
+
+/* Botões */
+.btn { display: inline-flex; align-items: center; gap: 8px; justify-content: center; padding: 15px 30px; border-radius: var(--radius-pill); font-weight: 600; font-size: .95rem; letter-spacing: -0.01em; border: 1.5px solid transparent; cursor: pointer; text-decoration: none !important; transition: transform .2s cubic-bezier(.2,.8,.2,1), box-shadow .2s ease, background .2s ease, color .2s ease; white-space: nowrap; }
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0) scale(.98); }
+.btn-primary { background: var(--red); color: var(--white); box-shadow: 0 10px 24px rgba(227,5,45,.25); }
+.btn-primary:hover { background: var(--red-dark); }
+.btn-secondary { background: var(--navy); color: var(--white); }
+.btn-secondary:hover { background: var(--navy-light); }
+.btn-outline { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.5); color: var(--white); }
+.btn-outline:hover { background: rgba(255,255,255,.16); }
+.btn-outline-navy { background: transparent; border-color: var(--gray-300); color: var(--navy); }
+.btn-outline-navy:hover { background: var(--navy); border-color: var(--navy); color: var(--white); }
+.btn-whatsapp { background: #25D366; color: var(--white); box-shadow: 0 10px 24px rgba(37,211,102,.28); }
+.btn-whatsapp:hover { background: #1DA851; }
+.btn-block { width: 100%; }
+.btn-sm { padding: 10px 18px; font-size: .82rem; }
+
+/* Header / Nav */
+.site-header { position: sticky; top: 0; z-index: 500; background: rgba(255,255,255,.8); backdrop-filter: saturate(180%) blur(20px); box-shadow: 0 1px 0 rgba(0,0,0,.06); }
+.topbar { background: var(--navy-dark); color: var(--gray-300); font-size: .82rem; }
+.topbar .container { display: flex; justify-content: space-between; align-items: center; height: 36px; }
+.topbar a { color: var(--gray-300); }
+.topbar-links { display: flex; gap: 18px; }
+.navbar { display: flex; align-items: center; justify-content: space-between; height: 84px; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-logo { height: 40px; width: auto; display: block; }
+.nav-links { display: flex; align-items: center; gap: 26px; list-style: none; margin: 0; padding: 0; }
+.nav-links a { color: var(--navy); font-weight: 600; font-size: .92rem; }
+.nav-links a:hover { color: var(--red); text-decoration: none; }
+.nav-cta { display: flex; align-items: center; gap: 12px; }
+.nav-toggle { display: none; background: none; border: none; cursor: pointer; width: 40px; height: 40px; flex-direction: column; justify-content: center; gap: 5px; }
+.nav-toggle span { display: block; height: 3px; background: var(--navy); border-radius: 2px; }
+@media (max-width: 1080px) {
+  .nav-links { position: absolute; top: calc(100% + 8px); left: 16px; right: 16px; background: var(--white); flex-direction: column; align-items: flex-start; padding: 20px 24px; gap: 16px; box-shadow: var(--shadow-lg); border-radius: var(--radius); display: none; }
+  .nav-links.open { display: flex; }
+  .nav-toggle { display: flex; }
+  .nav-cta .btn-secondary { display: none; }
+  .topbar-links { display: none; }
+}
+
+/* Hero + carrossel */
+.hero { background: linear-gradient(120deg, var(--navy) 0%, var(--navy-dark) 100%); color: var(--white); padding: 90px 0; position: relative; overflow: hidden; }
+.hero::after { content: ""; position: absolute; right: -160px; top: -160px; width: 520px; height: 520px; border-radius: 50%; background: radial-gradient(circle, rgba(227,5,45,.30), transparent 70%); filter: blur(10px); }
+.hero-track { display: flex; transition: transform .6s cubic-bezier(.4,0,.2,1); }
+.hero-slide { min-width: 100%; }
+.hero-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 50px; align-items: center; position: relative; z-index: 1; }
+.hero h1 { color: var(--white); }
+.hero p.lead { color: var(--gray-300); font-size: 1.1rem; max-width: 520px; }
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 28px; }
+.hero-stats { display: flex; gap: 34px; margin-top: 46px; flex-wrap: wrap; }
+.hero-stats strong { display: block; font-size: 1.8rem; font-family: var(--font-heading); color: var(--white); }
+.hero-stats span { color: var(--gray-300); font-size: .85rem; }
+.hero-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); border-radius: var(--radius); padding: 28px; backdrop-filter: blur(6px); }
+@media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; } }
+.hero-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.25); color: var(--white); font-size: 1.3rem; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 3; }
+.hero-arrow.prev { left: 20px; } .hero-arrow.next { right: 20px; }
+.hero-dots { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); display: flex; gap: 8px; z-index: 3; }
+.hero-dots button { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.35); border: none; cursor: pointer; padding: 0; transition: all .25s ease; }
+.hero-dots button.active { background: var(--red); width: 24px; border-radius: 6px; }
+
+/* Grids & Cards */
+.grid { display: grid; gap: 28px; }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 960px) { .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+.card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease; border: 1px solid rgba(0,31,62,.05); }
+.card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+.card-body { padding: 22px; }
+.card img { height: 200px; object-fit: cover; width: 100%; }
+.card h3 { margin-bottom: .3em; }
+.card .meta { font-size: .85rem; color: var(--gray-500); margin-bottom: .6em; }
+.tag { display: inline-block; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 4px 10px; border-radius: 100px; background: var(--gray-100); color: var(--navy); }
+.tag--red { background: rgba(227,5,45,.12); color: var(--red); }
+.tag--green { background: rgba(37,211,102,.15); color: #128a43; }
+.tag--gold { background: rgba(212,160,23,.15); color: #a3780f; }
+.icon-box { width: 56px; height: 56px; border-radius: 18px; background: rgba(227,5,45,.1); color: var(--red); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 18px; }
+
+/* Property card */
+.property-card { display: flex; flex-direction: column; cursor: pointer; }
+.property-card .img-wrap { position: relative; }
+.property-card .status-badge { position: absolute; top: 14px; left: 14px; font-size: .72rem; font-weight: 700; padding: 5px 12px; border-radius: 100px; background: var(--white); color: var(--navy); }
+.property-price { font-family: var(--font-heading); color: var(--red); font-weight: 800; font-size: 1.25rem; margin: 4px 0 10px; }
+.property-specs { display: flex; gap: 14px; font-size: .84rem; color: var(--gray-700); border-top: 1px solid var(--gray-100); padding-top: 12px; margin-top: 10px; flex-wrap: wrap; }
+
+/* Filtros */
+.filters-bar { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 36px; }
+@media (max-width: 960px) { .filters-bar { grid-template-columns: repeat(2, 1fr); } }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: .78rem; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: .03em; }
+input, select, textarea { font-family: var(--font-body); padding: 13px 16px; border: 1.5px solid var(--gray-300); border-radius: var(--radius-sm); font-size: .95rem; color: var(--text); background: var(--off-white); width: 100%; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--red); background: var(--white); box-shadow: 0 0 0 4px rgba(227,5,45,.10); }
+.results-count { color: var(--gray-500); margin-bottom: 20px; font-size: .92rem; }
+
+/* Forms */
+.form-card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 34px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+@media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+.form-note { font-size: .8rem; color: var(--gray-500); margin-top: 10px; }
+.checkbox-row { display: flex; align-items: flex-start; gap: 10px; font-size: .85rem; color: var(--gray-700); }
+.checkbox-row input { width: auto; margin-top: 3px; }
+.form-success { display: none; background: rgba(37,211,102,.12); border: 1px solid rgba(37,211,102,.4); color: #128a43; padding: 14px 18px; border-radius: var(--radius-sm); margin-bottom: 18px; font-size: .9rem; }
+.form-success.show { display: block; }
+
+/* Depoimentos */
+.testimonial-card { padding: 26px; }
+.testimonial-card .stars { color: #F2A900; margin-bottom: 10px; letter-spacing: 2px; }
+.testimonial-card p { font-style: italic; color: var(--text); }
+.testimonial-author { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+.avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--navy); color: var(--white); display: flex; align-items: center; justify-content: center; font-weight: 700; font-family: var(--font-heading); flex-shrink: 0; }
+
+/* Timeline */
+.timeline { position: relative; padding-left: 32px; border-left: 3px solid var(--gray-300); }
+.timeline-item { position: relative; padding-bottom: 34px; }
+.timeline-item::before { content: ""; position: absolute; left: -40px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--red); border: 3px solid var(--white); box-shadow: 0 0 0 2px var(--red); }
+.timeline-year { color: var(--red); font-weight: 800; font-family: var(--font-heading); }
+
+/* Slider genérico */
+.slider { position: relative; }
+.slider-viewport { overflow: hidden; }
+.slider-track { display: flex; gap: 28px; transition: transform .5s cubic-bezier(.4,0,.2,1); }
+.slider-track > * { flex: 0 0 calc((100% - 56px) / 3); }
+@media (max-width: 960px) { .slider-track > * { flex: 0 0 calc((100% - 28px) / 2); } }
+@media (max-width: 640px) { .slider-track > * { flex: 0 0 100%; } }
+.slider-arrow { position: absolute; top: 40%; transform: translateY(-50%); width: 48px; height: 48px; border-radius: 50%; background: var(--white); box-shadow: var(--shadow); color: var(--navy); font-size: 1.4rem; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 4; }
+.slider-arrow.prev { left: -20px; } .slider-arrow.next { right: -20px; }
+.slider-arrow.off { opacity: .35; pointer-events: none; }
+@media (max-width: 720px) { .slider-arrow.prev { left: 4px; } .slider-arrow.next { right: 4px; } }
+.slider-dots { display: flex; gap: 8px; justify-content: center; margin-top: 30px; }
+.slider-dots span { width: 9px; height: 9px; border-radius: 50%; background: var(--gray-300); cursor: pointer; transition: all .25s ease; display: block; }
+.slider-dots span.active { background: var(--red); width: 24px; border-radius: 6px; }
+
+/* Bairros / tags de atuação */
+.bairro-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+.bairro-tags span { background: var(--white); border: 1px solid var(--gray-300); padding: 8px 16px; border-radius: var(--radius-pill); font-size: .85rem; color: var(--navy); font-weight: 600; }
+.map-embed { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.map-embed iframe { width: 100%; height: 340px; border: 0; display: block; }
+
+/* Footer */
+.site-footer { background: var(--navy-dark); color: var(--gray-300); padding: 60px 0 20px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1.3fr; gap: 40px; margin-bottom: 40px; }
+@media (max-width: 900px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .footer-grid { grid-template-columns: 1fr; } }
+.site-footer h4 { color: var(--white); font-size: .95rem; margin-bottom: 16px; }
+.site-footer ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.site-footer a { color: var(--gray-300); font-size: .9rem; }
+.site-footer a:hover { color: var(--white); }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding-top: 20px; font-size: .82rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.social-row { display: flex; gap: 10px; }
+.social-row a { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; }
+
+/* WhatsApp flutuante */
+.wa-float { position: fixed; bottom: 24px; right: 24px; z-index: 900; background: #25D366; color: var(--white); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(37,211,102,.5); font-size: 1.7rem; border: none; cursor: pointer; animation: pulse 2.4s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(37,211,102,.5); } 70% { box-shadow: 0 0 0 14px rgba(37,211,102,0); } 100% { box-shadow: 0 0 0 0 rgba(37,211,102,0); } }
+
+/* Modal de imóvel */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,20,40,.55); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(3px); }
+.modal-overlay.open { display: flex; }
+.modal-box { background: var(--white); border-radius: var(--radius); max-width: 720px; width: 100%; max-height: 88vh; overflow-y: auto; box-shadow: var(--shadow-lg); position: relative; }
+.modal-close { position: absolute; top: 16px; right: 16px; width: 38px; height: 38px; border-radius: 50%; background: var(--white); box-shadow: var(--shadow); border: none; font-size: 1.2rem; cursor: pointer; z-index: 2; }
+.modal-box img.modal-img { width: 100%; height: 280px; object-fit: cover; border-radius: var(--radius) var(--radius) 0 0; }
+.modal-body { padding: 30px; }
+
+/* Blog */
+.blog-body { display: none; margin-top: 14px; }
+.blog-body.open { display: block; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="topbar">
+    <div class="container">
+      <div class="topbar-links">
+        <a href="tel:+5587999143998">📞 (87) 99914-3998</a>
+        <a href="mailto:rochacosta@rochacosta.com">✉️ rochacosta@rochacosta.com</a>
+      </div>
+      <div>Petrolina, Pernambuco</div>
+    </div>
+  </div>
+  <div class="container">
+    <nav class="navbar">
+      <a href="#home" class="brand"><img src="img/logo-rocha-costa.png" alt="Rocha Costa Construtora" class="brand-logo"></a>
+      <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#sobre">Sobre</a></li>
+        <li><a href="#empreendimentos">Empreendimentos</a></li>
+        <li><a href="#portfolio">Portfólio</a></li>
+        <li><a href="#atuamos">Onde atuamos</a></li>
+        <li><a href="#simulador">Simulador</a></li>
+        <li><a href="#depoimentos">Depoimentos</a></li>
+        <li><a href="#blog">Blog</a></li>
+        <li><a href="#contato">Contato</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="#contato" class="btn btn-secondary btn-sm">Fale conosco</a>
+        <button class="nav-toggle" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- ================= HOME / HERO ================= -->
+<section class="hero" id="home">
+  <div class="hero-track" id="hero-track">
+    <div class="hero-slide">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow" style="color:#ff8095;">Construtora MCMV em Petrolina-PE</span>
+          <h1>Construímos o lugar onde a sua história continua.</h1>
+          <p class="lead">Há anos entregando empreendimentos residenciais com qualidade, transparência e prazo cumprido em Petrolina e região. Da fundação às chaves na mão.</p>
+          <div class="hero-actions">
+            <a href="#empreendimentos" class="btn btn-primary">Ver imóveis disponíveis</a>
+            <a href="#" class="btn btn-whatsapp" data-wa>💬 Falar no WhatsApp</a>
+          </div>
+          <div class="hero-stats">
+            <div><strong>500+</strong><span>Famílias atendidas</span></div>
+            <div><strong>30+</strong><span>Empreendimentos entregues</span></div>
+            <div><strong>100%</strong><span>Prazo de entrega respeitado</span></div>
+          </div>
+        </div>
+        <div class="hero-card">
+          <span class="eyebrow" style="color:#ff8095;">Simule agora</span>
+          <h3 style="color:#fff;">Quanto cabe no seu bolso?</h3>
+          <p style="color:var(--gray-300);">Use nosso simulador de financiamento e descubra uma estimativa de parcela em menos de 1 minuto.</p>
+          <a href="#simulador" class="btn btn-outline btn-block">Simular financiamento</a>
+        </div>
+      </div>
+    </div>
+    <div class="hero-slide">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow" style="color:#ff8095;">Empreendimentos entregues</span>
+          <h1>Mais de 30 empreendimentos já entregues em Petrolina.</h1>
+          <p class="lead">Do primeiro tijolo às chaves na mão: conheça as obras que já viraram lar para centenas de famílias e veja por que elas confiaram na Rocha Costa.</p>
+          <div class="hero-actions">
+            <a href="#portfolio" class="btn btn-primary">Ver portfólio de obras</a>
+            <a href="#depoimentos" class="btn btn-outline">Ver depoimentos</a>
+          </div>
+        </div>
+        <div class="hero-card">
+          <span class="eyebrow" style="color:#ff8095;">Depoimento</span>
+          <h3 style="color:#fff;">"Qualidade nota 1000"</h3>
+          <p style="color:var(--gray-300);">"Sempre tive o sonho e agora foi realizado graças à Rocha Costa. Estou muito agradecido pelo atendimento e qualidade da casa." — João, Nova Vida 02</p>
+          <a href="#depoimentos" class="btn btn-outline btn-block">Ler mais depoimentos</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="hero-arrow prev" data-hero-prev aria-label="Slide anterior">‹</button>
+  <button class="hero-arrow next" data-hero-next aria-label="Próximo slide">›</button>
+  <div class="hero-dots" id="hero-dots"></div>
+</section>
+
+<!-- ================= DIFERENCIAIS ================= -->
+<section class="section">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">Por que a Rocha Costa</span>
+      <h2>Uma construtora pensada para quem vai morar, não só para quem vai vender</h2>
+    </div>
+    <div class="grid grid-3">
+      <div class="card"><div class="card-body">
+        <div class="icon-box">🏗️</div>
+        <h3>Obra própria, sem terceirização</h3>
+        <p>Acompanhamos cada etapa da construção com equipe própria, garantindo padrão de qualidade em todos os empreendimentos.</p>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <div class="icon-box">📄</div>
+        <h3>Suporte em financiamento MCMV</h3>
+        <p>Ajudamos você a entender e conseguir as melhores condições dentro do programa Minha Casa Minha Vida.</p>
+      </div></div>
+      <div class="card"><div class="card-body">
+        <div class="icon-box">🤝</div>
+        <h3>Atendimento até depois da entrega</h3>
+        <p>Nosso relacionamento com o cliente não termina na entrega das chaves — seguimos disponíveis no pós-obra.</p>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SOBRE ================= -->
+<section class="section section--alt" id="sobre">
+  <div class="container">
+    <div class="grid grid-2" style="align-items:center;">
+      <div>
+        <span class="eyebrow">Nossa história</span>
+        <h2>Mais de uma década construindo Petrolina</h2>
+        <p>A Rocha Costa é uma construtora sediada em Petrolina, Pernambuco, dedicada a empreendimentos residenciais que unem qualidade construtiva, preço justo e prazo de entrega cumprido — incluindo casas dentro do programa Minha Casa Minha Vida.</p>
+        <p>Nascemos do compromisso de fazer diferente em um mercado onde atrasos e falta de transparência ainda são comuns. Cada casa que assinamos carrega o nosso nome — e isso é levado a sério em cada detalhe da obra.</p>
+      </div>
+      <img src="https://picsum.photos/seed/rochacostasobre/640/440" alt="Obra da Rocha Costa em Petrolina" style="border-radius:24px;box-shadow:var(--shadow-lg);">
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-head center">
+      <span class="eyebrow">Nossa trajetória</span>
+      <h2>Linha do tempo</h2>
+    </div>
+    <div class="timeline" style="max-width:720px;margin:0 auto;">
+      <div class="timeline-item">
+        <div class="timeline-year">2012</div>
+        <h3>Fundação da Rocha Costa</h3>
+        <p>Início das atividades em Petrolina/PE com os primeiros projetos residenciais de pequeno porte.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2016</div>
+        <h3>Primeiros empreendimentos MCMV</h3>
+        <p>Entrada no segmento de habitação popular, ampliando o acesso à casa própria na região.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2020</div>
+        <h3>Expansão da equipe própria de obra</h3>
+        <p>Estruturação de equipe própria de engenharia e construção, elevando o padrão de qualidade e controle de prazos.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2026</div>
+        <h3>Mais de 30 empreendimentos entregues</h3>
+        <p>Consolidação como uma das construtoras de referência em Petrolina e região.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= EMPREENDIMENTOS / CATÁLOGO ================= -->
+<section class="section" id="empreendimentos">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Empreendimentos</span>
+      <h2>Casas MCMV e imóveis à venda em Petrolina</h2>
+      <p>Confira os imóveis disponíveis atualmente. Clique em um card para ver os detalhes.</p>
+    </div>
+    <div class="slider" id="destaques-slider">
+      <div class="slider-viewport"><div class="slider-track" id="destaques-grid"></div></div>
+      <button class="slider-arrow prev" data-slider-prev aria-label="Anterior">‹</button>
+      <button class="slider-arrow next" data-slider-next aria-label="Próximo">›</button>
+      <div class="slider-dots"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="filters-bar" id="filtros-imoveis">
+      <div class="field"><label for="filtro-bairro">Bairro</label><select id="filtro-bairro"><option value="">Todos</option></select></div>
+      <div class="field">
+        <label for="filtro-tipo">Tipo</label>
+        <select id="filtro-tipo"><option value="">Todos</option><option>Apartamento</option><option>Casa</option><option>Casa em condomínio</option><option>Terreno</option></select>
+      </div>
+      <div class="field">
+        <label for="filtro-status">Status da obra</label>
+        <select id="filtro-status"><option value="">Todos</option><option>Lançamento</option><option>Em obras</option><option>Pronto para morar</option></select>
+      </div>
+      <div class="field">
+        <label for="filtro-preco">Preço até</label>
+        <select id="filtro-preco">
+          <option value="">Sem limite</option>
+          <option value="150000">R$ 150.000</option>
+          <option value="400000">R$ 400.000</option>
+          <option value="800000">R$ 800.000</option>
+          <option value="2000000">R$ 2.000.000</option>
+          <option value="5000000">R$ 5.000.000</option>
+        </select>
+      </div>
+      <div class="field" style="justify-content:flex-end;"><label>&nbsp;</label><button id="filtro-limpar" class="btn btn-outline-navy btn-block">Limpar filtros</button></div>
+    </div>
+    <p class="results-count" id="resultados-count"></p>
+    <div class="grid grid-3" id="imoveis-grid"></div>
+  </div>
+</section>
+
+<!-- ================= PORTFÓLIO DE OBRAS ================= -->
+<section class="section section--alt" id="portfolio">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Obras realizadas</span>
+      <h2>Empreendimentos que já entregamos</h2>
+    </div>
+    <div class="slider" id="portfolio-slider">
+      <div class="slider-viewport"><div class="slider-track" id="portfolio-grid"></div></div>
+      <button class="slider-arrow prev" data-slider-prev aria-label="Anterior">‹</button>
+      <button class="slider-arrow next" data-slider-next aria-label="Próximo">›</button>
+      <div class="slider-dots"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ONDE ATUAMOS ================= -->
+<section class="section" id="atuamos">
+  <div class="container">
+    <div class="grid grid-2" style="align-items:center;">
+      <div>
+        <span class="eyebrow">Onde atuamos</span>
+        <h2>Atuação consolidada em Petrolina, Pernambuco</h2>
+        <p>Construímos e entregamos empreendimentos em diversos bairros de Petrolina, sempre com equipe própria acompanhando cada obra de perto.</p>
+        <div class="bairro-tags">
+          <span>Centro</span><span>Vila Eduardo</span><span>Vila Mocó</span><span>Cohab</span>
+          <span>Areia Branca</span><span>Padre Cícero</span><span>Cidade Universitária</span>
+          <span>Angical</span><span>José e Maria</span><span>Distrito Industrial</span>
+        </div>
+      </div>
+      <div class="map-embed">
+        <iframe src="https://www.google.com/maps?q=Petrolina,PE&output=embed" allowfullscreen loading="lazy" title="Mapa de Petrolina-PE"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SIMULADOR ================= -->
+<section class="section section--alt" id="simulador">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Ferramenta</span>
+      <h2>Simulador de financiamento</h2>
+    </div>
+    <div class="grid grid-2" style="align-items:flex-start;">
+      <form class="form-card" id="form-simulador">
+        <h3 class="mt-0">Preencha os dados</h3>
+        <div class="field" style="margin-bottom:16px;"><label for="sim-valor">Valor do imóvel (R$)</label><input id="sim-valor" type="number" min="10000" step="1000" value="250000" required></div>
+        <div class="form-row">
+          <div class="field"><label for="sim-entrada">Entrada (%)</label><input id="sim-entrada" type="number" min="0" max="90" value="20" required></div>
+          <div class="field"><label for="sim-prazo">Prazo (anos)</label><input id="sim-prazo" type="number" min="1" max="35" value="30" required></div>
+        </div>
+        <div class="field" style="margin-bottom:20px;"><label for="sim-taxa">Taxa de juros anual estimada (%)</label><input id="sim-taxa" type="number" min="0" max="30" step="0.1" value="9.5" required></div>
+        <button type="submit" class="btn btn-primary btn-block">Calcular estimativa</button>
+        <p class="form-note">Estimativa educativa (Tabela Price). As condições reais dependem da análise do banco/agente financeiro.</p>
+      </form>
+      <div>
+        <div class="form-card" id="sim-resultado" style="display:none;">
+          <h3 class="mt-0">Resultado estimado</h3>
+          <p style="display:flex;justify-content:space-between;"><span>Valor de entrada</span><strong id="res-entrada"></strong></p>
+          <p style="display:flex;justify-content:space-between;"><span>Valor financiado</span><strong id="res-financiado"></strong></p>
+          <div class="divider"></div>
+          <p style="display:flex;justify-content:space-between;font-size:1.2rem;"><span>Parcela mensal estimada</span><strong style="color:var(--red);" id="res-parcela"></strong></p>
+          <p style="display:flex;justify-content:space-between;color:var(--gray-500);font-size:.85rem;"><span>Total pago ao final do prazo</span><span id="res-total"></span></p>
+          <div class="divider"></div>
+          <a href="#" class="btn btn-whatsapp btn-block" data-wa>💬 Quero essa condição — falar no WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DEPOIMENTOS ================= -->
+<section class="section" id="depoimentos">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">Clientes Rocha Costa</span>
+      <h2>Quem já construiu com a gente</h2>
+    </div>
+    <div class="grid grid-3" id="depoimentos-grid"></div>
+  </div>
+</section>
+
+<!-- ================= BLOG ================= -->
+<section class="section section--alt" id="blog">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Conteúdo</span>
+      <h2>Blog Rocha Costa</h2>
+    </div>
+    <div class="grid grid-3" id="blog-grid"></div>
+  </div>
+</section>
+
+<!-- ================= CONTATO ================= -->
+<section class="section section--navy" id="contato">
+  <div class="container">
+    <div class="grid grid-2" style="align-items:flex-start;">
+      <div>
+        <span class="eyebrow" style="color:#ff8095;">Vamos conversar?</span>
+        <h2>Fale agora com nosso time</h2>
+        <p>Preencha o formulário ou chame diretamente no WhatsApp. Retornamos o mais rápido possível.</p>
+        <div class="hero-actions">
+          <a href="#" class="btn btn-whatsapp" data-wa>💬 Chamar no WhatsApp</a>
+        </div>
+        <div style="margin-top:30px;">
+          <p style="color:var(--gray-300);">📍 Petrolina, Pernambuco</p>
+          <p style="color:var(--gray-300);">📞 (87) 99914-3998</p>
+          <p style="color:var(--gray-300);">✉️ rochacosta@rochacosta.com</p>
+        </div>
+      </div>
+      <form class="form-card" data-contact-form data-open-whatsapp="true" style="color:var(--text);">
+        <div class="form-success"></div>
+        <div class="field" style="margin-bottom:14px;"><label for="ct-nome">Nome completo</label><input id="ct-nome" name="nome" type="text" required></div>
+        <div class="form-row">
+          <div class="field"><label for="ct-telefone">Telefone / WhatsApp</label><input id="ct-telefone" name="telefone" type="tel" required></div>
+          <div class="field"><label for="ct-email">E-mail</label><input id="ct-email" name="email" type="email" required></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Enviar e falar no WhatsApp</button>
+        <p class="form-note">Este site não tem backend — o formulário abre o WhatsApp com seus dados para agilizar o atendimento.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <img src="img/logo-rocha-costa.png" alt="Rocha Costa Construtora" style="height:34px;filter:brightness(0) invert(1);margin-bottom:14px;">
+        <p>Construtora em Petrolina/PE, especializada em empreendimentos residenciais e casas MCMV com qualidade e prazo cumprido.</p>
+        <div class="social-row">
+          <a href="#" aria-label="Instagram">📷</a>
+          <a href="#" aria-label="Facebook">📘</a>
+          <a href="#" data-wa aria-label="WhatsApp">💬</a>
+        </div>
+      </div>
+      <div><h4>Institucional</h4><ul><li><a href="#sobre">Sobre nós</a></li><li><a href="#portfolio">Portfólio</a></li><li><a href="#depoimentos">Depoimentos</a></li><li><a href="#blog">Blog</a></li></ul></div>
+      <div><h4>Imóveis</h4><ul><li><a href="#empreendimentos">Catálogo completo</a></li><li><a href="#simulador">Simulador de financiamento</a></li><li><a href="#contato">Agendar visita</a></li></ul></div>
+      <div><h4>Contato</h4><ul><li>📍 Petrolina, Pernambuco</li><li>📞 (87) 99914-3998</li><li>✉️ rochacosta@rochacosta.com</li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <span data-ano></span> Rocha Costa Construtora. Todos os direitos reservados.</span>
+      <span>Este site não coleta nem armazena dados automaticamente — os dados do formulário só vão para o seu WhatsApp.</span>
+    </div>
+  </div>
+</footer>
+
+<a href="#" class="wa-float" data-wa aria-label="Fale no WhatsApp">💬</a>
+
+<!-- Modal de detalhe do imóvel -->
+<div class="modal-overlay" id="modal-imovel">
+  <div class="modal-box">
+    <button class="modal-close" id="modal-fechar" aria-label="Fechar">&times;</button>
+    <div id="modal-conteudo"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   Rocha Costa — JS único (site sem backend)
+   ========================================================= */
+
+const ROCHA_COSTA = { whatsappNumber: '5587999143998' };
+
+function saudacaoPorHorario() {
+  const hora = new Date().getHours();
+  if (hora >= 5 && hora < 12) return 'Bom dia';
+  if (hora >= 12 && hora < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
+function linkWhatsApp(itemLabel) {
+  const saudacao = saudacaoPorHorario();
+  const base = itemLabel
+    ? `${saudacao}! Quero mais informações sobre o imóvel ${itemLabel}.`
+    : `${saudacao}! Quero mais informações sobre o imóvel escolhido.`;
+  return `https://wa.me/${ROCHA_COSTA.whatsappNumber}?text=${encodeURIComponent(base)}`;
+}
+function ligarBotoesWhatsApp(scope = document) {
+  scope.querySelectorAll('[data-wa]').forEach((el) => {
+    const item = el.getAttribute('data-wa-item') || undefined;
+    el.setAttribute('href', linkWhatsApp(item));
+    el.setAttribute('target', '_blank');
+    el.setAttribute('rel', 'noopener');
+  });
+}
+function formatarBRL(valor) {
+  return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+}
+function preencherAnoRodape() {
+  document.querySelectorAll('[data-ano]').forEach((el) => { el.textContent = new Date().getFullYear(); });
+}
+function iniciarMenuMobile() {
+  const toggle = document.querySelector('.nav-toggle');
+  const links = document.querySelector('.nav-links');
+  if (!toggle || !links) return;
+  toggle.addEventListener('click', () => links.classList.toggle('open'));
+  links.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => links.classList.remove('open')));
+}
+function iniciarFormularioContato() {
+  document.querySelectorAll('form[data-contact-form]').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const dados = Object.fromEntries(new FormData(form).entries());
+      const sucesso = form.querySelector('.form-success');
+      if (sucesso) {
+        sucesso.classList.add('show');
+        sucesso.textContent = 'Recebemos seus dados! Você também pode falar agora mesmo pelo WhatsApp.';
+      }
+      if (form.getAttribute('data-open-whatsapp') === 'true') {
+        window.open(linkWhatsApp(), '_blank', 'noopener');
+      }
+      form.reset();
+    });
+  });
+}
+
+/* ---- Dados (embutidos — sem backend) ---- */
+const IMOVEIS = [{"id": 1, "tipo": "Casa", "cidade": "Petrolina", "estado": "PE", "area": 60, "quartos": 2, "banheiros": 1, "vagas": 1, "destaque": false, "imagem": "https://picsum.photos/seed/rochacosta1/640/440", "descricao": "Imóvel cadastrado pelo painel administrativo.", "titulo": "casas de forma", "bairro": "nova vida 02", "status": "Pronto para morar", "preco": 320000}, {"id": 2, "tipo": "Casa", "cidade": "Petrolina", "estado": "PE", "area": 60, "quartos": 2, "banheiros": 1, "vagas": 1, "destaque": false, "imagem": "https://picsum.photos/seed/rochacosta2/640/440", "descricao": "Imóvel cadastrado pelo painel administrativo.", "titulo": "casas alvenaria", "bairro": "vila do futuro", "status": "Pronto para morar", "preco": 400000}, {"id": 3, "tipo": "Casa", "cidade": "Petrolina", "estado": "PE", "area": 60, "quartos": 2, "banheiros": 1, "vagas": 1, "destaque": false, "imagem": "https://picsum.photos/seed/rochacosta3/640/440", "descricao": "Imóvel cadastrado pelo painel administrativo.", "titulo": "casas de forma", "bairro": "casas de forma", "status": "Pronto para morar", "preco": 2922929}, {"id": 4, "tipo": "Casa", "cidade": "Petrolina", "estado": "PE", "area": 60, "quartos": 2, "banheiros": 1, "vagas": 1, "destaque": false, "imagem": "https://picsum.photos/seed/rochacosta4/640/440", "descricao": "Imóvel cadastrado pelo painel administrativo.", "titulo": "casas de forma", "bairro": "casas de forma", "status": "Pronto para morar", "preco": 4848448}, {"id": 5, "tipo": "Casa", "cidade": "Petrolina", "estado": "PE", "area": 60, "quartos": 2, "banheiros": 1, "vagas": 1, "destaque": false, "imagem": "https://picsum.photos/seed/rochacosta5/640/440", "descricao": "Imóvel cadastrado pelo painel administrativo.", "titulo": "casas de forma", "bairro": "casas de forma", "status": "Pronto para morar", "preco": 2192219}];
+const DEPOIMENTOS = [{"id": 1, "nome": "João", "empreendimento": "Nova Vida 02", "estrelas": 5, "texto": "Muito boa a casa, qualidade nota 1000. Sempre tive o sonho e agora foi realizado graças à Rocha Costa. Estou muito agradecido pelo atendimento e qualidade da casa."}, {"id": 2, "nome": "Maria Eduarda Silva", "empreendimento": "Residencial Vila Eduardo", "estrelas": 5, "texto": "Realizamos o sonho da casa própria com a Rocha Costa. Do primeiro contato até a entrega das chaves, fomos muito bem atendidos e o acabamento superou nossa expectativa."}, {"id": 3, "nome": "João Paulo Barbosa", "empreendimento": "Condomínio Areia Branca", "estrelas": 5, "texto": "Comprei na planta e acompanhei toda a obra. Prazo cumprido, comunicação transparente e suporte total na hora da documentação e financiamento."}, {"id": 4, "nome": "Fernanda Costa Lima", "empreendimento": "Residencial Padre Cícero", "estrelas": 5, "texto": "Equipe muito atenciosa, sempre disponível para tirar dúvidas. Recomendo a Rocha Costa para quem busca uma construtora séria em Petrolina."}, {"id": 5, "nome": "Roberto Andrade", "empreendimento": "Loteamento Cidade Universitária", "estrelas": 4, "texto": "Processo de compra do terreno foi rápido e sem burocracia. A equipe explicou cada etapa com muita clareza."}];
+const OBRAS_PORTFOLIO = [
+  { nome: 'Residencial Vila Eduardo', ano: 2024, unidades: 48, status: 'Entregue', imagem: 'https://picsum.photos/seed/obra1/640/440' },
+  { nome: 'Condomínio Areia Branca', ano: 2023, unidades: 32, status: 'Entregue', imagem: 'https://picsum.photos/seed/obra2/640/440' },
+  { nome: 'Residencial Padre Cícero', ano: 2022, unidades: 60, status: 'Entregue', imagem: 'https://picsum.photos/seed/obra3/640/440' },
+  { nome: 'Loteamento Cidade Universitária', ano: 2021, unidades: 120, status: 'Entregue', imagem: 'https://picsum.photos/seed/obra4/640/440' },
+  { nome: 'Residencial Angical', ano: 2020, unidades: 40, status: 'Entregue', imagem: 'https://picsum.photos/seed/obra5/640/440' },
+  { nome: 'Condomínio Jardim Amazonas', ano: 2019, unidades: 28, status: 'Entregue', imagem: 'https://picsum.photos/seed/obra6/640/440' },
+];
+const POSTS_BLOG = [
+  { id: 1, titulo: 'Como funciona o financiamento pelo Minha Casa Minha Vida em 2026', categoria: 'Financiamento',
+    resumo: 'Entenda as faixas de renda, taxas de juros e documentação necessária para financiar seu imóvel.',
+    corpo: 'O programa habitacional facilita o acesso à casa própria por meio de subsídios e taxas de juros reduzidas, organizadas por faixas de renda familiar. Antes de assinar qualquer contrato, é fundamental reunir a documentação pessoal, comprovantes de renda e simular as condições junto ao agente financeiro. Na Rocha Costa, nossa equipe acompanha o cliente durante todo o processo de aprovação.' },
+  { id: 2, titulo: '5 sinais de que uma construtora entrega qualidade de verdade', categoria: 'Mercado imobiliário',
+    resumo: 'Prazo, transparência, acabamento e suporte pós-obra: veja o que observar antes de fechar negócio.',
+    corpo: 'Escolher uma construtora vai muito além do preço do imóvel. É importante avaliar o histórico de entregas no prazo, a qualidade dos materiais utilizados, a transparência na comunicação durante a obra e o suporte oferecido após a entrega das chaves. A Rocha Costa preza por manter o cliente informado em cada etapa.' },
+  { id: 3, titulo: 'Petrolina em expansão: os bairros que mais crescem para investir', categoria: 'Investimento',
+    resumo: 'Um panorama dos bairros com maior valorização imobiliária na cidade nos últimos anos.',
+    corpo: 'Petrolina tem vivido um ciclo consistente de expansão urbana, impulsionado pelo agronegócio e pelo crescimento populacional. Bairros como Vila Eduardo, Areia Branca e Cidade Universitária vêm concentrando novos lançamentos residenciais e comerciais.' },
+];
+
+function badgeStatusClasse(status) {
+  if (status === 'Pronto para morar') return 'tag--green';
+  if (status === 'Lançamento') return 'tag--gold';
+  return 'tag--red';
+}
+function cardImovelHTML(im) {
+  return `
+    <div class="card property-card" data-abrir-imovel="${im.id}">
+      <div class="img-wrap">
+        <img src="${im.imagem}" alt="${im.titulo}" loading="lazy">
+        <span class="status-badge">${im.status}</span>
+      </div>
+      <div class="card-body">
+        <span class="tag ${badgeStatusClasse(im.status)}">${im.tipo}</span>
+        <h3>${im.titulo}</h3>
+        <div class="meta">${im.bairro}, ${im.cidade}/${im.estado}</div>
+        <div class="property-price">${formatarBRL(im.preco)}</div>
+        <div class="property-specs">
+          ${im.quartos ? `<span>🛏️ ${im.quartos} qto(s)</span>` : ''}
+          ${im.banheiros ? `<span>🚿 ${im.banheiros} banh.</span>` : ''}
+          ${im.vagas ? `<span>🚗 ${im.vagas} vaga(s)</span>` : ''}
+          <span>📐 ${im.area} m²</span>
+        </div>
+      </div>
+    </div>`;
+}
+function renderGridImoveis(lista, containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = lista.length ? lista.map(cardImovelHTML).join('') : '<p>Nenhum imóvel encontrado com esses filtros.</p>';
+  el.querySelectorAll('[data-abrir-imovel]').forEach((card) => {
+    card.addEventListener('click', () => abrirModalImovel(card.getAttribute('data-abrir-imovel')));
+  });
+}
+function popularFiltros() {
+  const selBairro = document.getElementById('filtro-bairro');
+  if (selBairro) {
+    [...new Set(IMOVEIS.map((im) => im.bairro))].sort().forEach((b) => {
+      const opt = document.createElement('option'); opt.value = b; opt.textContent = b;
+      selBairro.appendChild(opt);
+    });
+  }
+}
+function lerFiltrosEAplicar() {
+  const bairro = document.getElementById('filtro-bairro')?.value || '';
+  const tipo = document.getElementById('filtro-tipo')?.value || '';
+  const status = document.getElementById('filtro-status')?.value || '';
+  const precoMax = document.getElementById('filtro-preco')?.value || '';
+  const filtrados = IMOVEIS.filter((im) => {
+    if (bairro && im.bairro !== bairro) return false;
+    if (tipo && im.tipo !== tipo) return false;
+    if (status && im.status !== status) return false;
+    if (precoMax && im.preco > Number(precoMax)) return false;
+    return true;
+  });
+  renderGridImoveis(filtrados, 'imoveis-grid');
+  const contagem = document.getElementById('resultados-count');
+  if (contagem) contagem.textContent = `${filtrados.length} imóvel(is) encontrado(s)`;
+}
+function iniciarCatalogoImoveis() {
+  popularFiltros();
+  ['filtro-bairro', 'filtro-tipo', 'filtro-status', 'filtro-preco'].forEach((id) => {
+    document.getElementById(id)?.addEventListener('change', lerFiltrosEAplicar);
+  });
+  document.getElementById('filtro-limpar')?.addEventListener('click', () => {
+    document.querySelectorAll('#filtros-imoveis select').forEach((s) => (s.value = ''));
+    lerFiltrosEAplicar();
+  });
+  lerFiltrosEAplicar();
+}
+function iniciarDestaques() {
+  const marcados = IMOVEIS.filter((im) => im.destaque);
+  const destaques = (marcados.length ? marcados : [...IMOVEIS].reverse()).slice(0, 6);
+  renderGridImoveis(destaques, 'destaques-grid');
+  iniciarSliderCards('#destaques-slider');
+}
+
+function abrirModalImovel(id) {
+  const im = IMOVEIS.find((x) => String(x.id) === String(id));
+  if (!im) return;
+  document.getElementById('modal-conteudo').innerHTML = `
+    <img class="modal-img" src="${im.imagem}" alt="${im.titulo}">
+    <div class="modal-body">
+      <span class="tag ${badgeStatusClasse(im.status)}">${im.status}</span>
+      <span class="tag">${im.tipo}</span>
+      <h2 style="margin-top:14px;">${im.titulo}</h2>
+      <p class="meta">${im.bairro}, ${im.cidade}/${im.estado}</p>
+      <div class="property-price" style="font-size:1.6rem;">${formatarBRL(im.preco)}</div>
+      <div class="property-specs" style="font-size:1rem;">
+        ${im.quartos ? `<span>🛏️ ${im.quartos} quarto(s)</span>` : ''}
+        ${im.banheiros ? `<span>🚿 ${im.banheiros} banheiro(s)</span>` : ''}
+        ${im.vagas ? `<span>🚗 ${im.vagas} vaga(s)</span>` : ''}
+        <span>📐 ${im.area} m²</span>
+      </div>
+      <div class="divider"></div>
+      <p>${im.descricao || ''}</p>
+      <a href="#" class="btn btn-whatsapp btn-block" data-wa data-wa-item="${im.titulo}">💬 Chamar no WhatsApp sobre este imóvel</a>
+    </div>`;
+  ligarBotoesWhatsApp(document.getElementById('modal-conteudo'));
+  document.getElementById('modal-imovel').classList.add('open');
+}
+function iniciarModal() {
+  document.getElementById('modal-fechar').addEventListener('click', () => document.getElementById('modal-imovel').classList.remove('open'));
+  document.getElementById('modal-imovel').addEventListener('click', (e) => {
+    if (e.target.id === 'modal-imovel') document.getElementById('modal-imovel').classList.remove('open');
+  });
+}
+
+/* ---- Depoimentos ---- */
+function iniciarDepoimentos() {
+  document.getElementById('depoimentos-grid').innerHTML = DEPOIMENTOS.map((d) => `
+    <div class="card testimonial-card">
+      <div class="stars">${'★'.repeat(d.estrelas)}${'☆'.repeat(5 - d.estrelas)}</div>
+      <p>"${d.texto}"</p>
+      <div class="testimonial-author">
+        <div class="avatar">${d.nome.charAt(0)}</div>
+        <div><strong>${d.nome}</strong><div class="meta">${d.empreendimento}</div></div>
+      </div>
+    </div>`).join('');
+}
+
+/* ---- Portfólio ---- */
+function iniciarPortfolio() {
+  document.getElementById('portfolio-grid').innerHTML = OBRAS_PORTFOLIO.map((o) => `
+    <div class="card">
+      <img src="${o.imagem}" alt="${o.nome}">
+      <div class="card-body">
+        <span class="tag tag--green">${o.status}</span>
+        <h3>${o.nome}</h3>
+        <p class="meta">Concluído em ${o.ano} · ${o.unidades} unidades</p>
+      </div>
+    </div>`).join('');
+  iniciarSliderCards('#portfolio-slider');
+}
+
+/* ---- Blog ---- */
+function iniciarBlog() {
+  document.getElementById('blog-grid').innerHTML = POSTS_BLOG.map((p) => `
+    <div class="card">
+      <div class="card-body">
+        <span class="tag">${p.categoria}</span>
+        <h3>${p.titulo}</h3>
+        <p>${p.resumo}</p>
+        <div class="blog-body" id="blog-body-${p.id}"><p>${p.corpo}</p></div>
+        <button class="btn btn-outline-navy btn-sm" data-blog-toggle="${p.id}">Ler mais</button>
+      </div>
+    </div>`).join('');
+  document.querySelectorAll('[data-blog-toggle]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-blog-toggle');
+      const body = document.getElementById(`blog-body-${id}`);
+      const aberto = body.classList.toggle('open');
+      btn.textContent = aberto ? 'Ler menos' : 'Ler mais';
+    });
+  });
+}
+
+/* ---- Simulador ---- */
+function calcularParcelaPrice(valorFinanciado, taxaAnualPercent, prazoAnos) {
+  const i = (taxaAnualPercent / 100) / 12;
+  const n = prazoAnos * 12;
+  if (i === 0) return valorFinanciado / n;
+  return valorFinanciado * (i / (1 - Math.pow(1 + i, -n)));
+}
+function iniciarSimulador() {
+  const form = document.getElementById('form-simulador');
+  if (!form) return;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const valorImovel = Number(document.getElementById('sim-valor').value);
+    const entradaPercent = Number(document.getElementById('sim-entrada').value);
+    const prazoAnos = Number(document.getElementById('sim-prazo').value);
+    const taxaAnual = Number(document.getElementById('sim-taxa').value);
+    const valorEntrada = valorImovel * (entradaPercent / 100);
+    const valorFinanciado = valorImovel - valorEntrada;
+    const parcela = calcularParcelaPrice(valorFinanciado, taxaAnual, prazoAnos);
+    const totalPago = parcela * prazoAnos * 12 + valorEntrada;
+    document.getElementById('sim-resultado').style.display = 'block';
+    document.getElementById('res-entrada').textContent = formatarBRL(valorEntrada);
+    document.getElementById('res-financiado').textContent = formatarBRL(valorFinanciado);
+    document.getElementById('res-parcela').textContent = formatarBRL(parcela);
+    document.getElementById('res-total').textContent = formatarBRL(totalPago);
+    document.getElementById('sim-resultado').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+}
+
+/* ---- Carrossel do hero ---- */
+function iniciarHeroCarousel() {
+  const track = document.getElementById('hero-track');
+  const dotsWrap = document.getElementById('hero-dots');
+  if (!track) return;
+  const slides = [...track.children];
+  let idx = 0; let timer;
+  function render() {
+    track.style.transform = `translateX(-${idx * 100}%)`;
+    if (dotsWrap) [...dotsWrap.children].forEach((d, i) => d.classList.toggle('active', i === idx));
+  }
+  function ir(i) { idx = (i + slides.length) % slides.length; render(); reiniciar(); }
+  function reiniciar() { clearInterval(timer); timer = setInterval(() => ir(idx + 1), 6000); }
+  if (dotsWrap) slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.addEventListener('click', () => ir(i));
+    dotsWrap.appendChild(dot);
+  });
+  document.querySelector('[data-hero-prev]')?.addEventListener('click', () => ir(idx - 1));
+  document.querySelector('[data-hero-next]')?.addEventListener('click', () => ir(idx + 1));
+  let startX = null;
+  track.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', (e) => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 40) ir(idx + (dx < 0 ? 1 : -1));
+    startX = null;
+  });
+  render(); reiniciar();
+}
+
+/* ---- Slider genérico de cards ---- */
+function iniciarSliderCards(sliderSelector) {
+  const slider = document.querySelector(sliderSelector);
+  if (!slider) return;
+  const viewport = slider.querySelector('.slider-viewport');
+  const track = slider.querySelector('.slider-track');
+  const prevBtn = slider.querySelector('[data-slider-prev]');
+  const nextBtn = slider.querySelector('[data-slider-next]');
+  const dotsWrap = slider.querySelector('.slider-dots');
+  if (!viewport || !track || !track.children.length) return;
+  let idx = 0;
+  function gap() { return parseFloat(getComputedStyle(track).gap) || 28; }
+  function stepWidth() { return track.children[0].getBoundingClientRect().width + gap(); }
+  function porView() { return Math.max(1, Math.round((viewport.getBoundingClientRect().width + gap()) / stepWidth())); }
+  function idxMax() { return Math.max(0, track.children.length - porView()); }
+  function montarDots() {
+    if (!dotsWrap) return;
+    dotsWrap.innerHTML = '';
+    for (let i = 0; i <= idxMax(); i++) {
+      const dot = document.createElement('span');
+      if (i === idx) dot.classList.add('active');
+      dot.addEventListener('click', () => { idx = i; render(); });
+      dotsWrap.appendChild(dot);
+    }
+  }
+  function render() {
+    idx = Math.min(idx, idxMax());
+    track.style.transform = `translateX(-${idx * stepWidth()}px)`;
+    if (dotsWrap) [...dotsWrap.children].forEach((d, i) => d.classList.toggle('active', i === idx));
+    prevBtn?.classList.toggle('off', idx <= 0);
+    nextBtn?.classList.toggle('off', idx >= idxMax());
+  }
+  function ir(delta) { idx = Math.max(0, Math.min(idxMax(), idx + delta)); render(); }
+  prevBtn?.addEventListener('click', () => ir(-1));
+  nextBtn?.addEventListener('click', () => ir(1));
+  let startX = null;
+  viewport.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
+  viewport.addEventListener('touchend', (e) => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (Math.abs(dx) > 40) ir(dx < 0 ? 1 : -1);
+    startX = null;
+  });
+  montarDots(); render();
+  window.addEventListener('resize', () => { montarDots(); render(); });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  iniciarMenuMobile();
+  ligarBotoesWhatsApp();
+  iniciarFormularioContato();
+  preencherAnoRodape();
+  iniciarHeroCarousel();
+  iniciarCatalogoImoveis();
+  iniciarDestaques();
+  iniciarDepoimentos();
+  iniciarPortfolio();
+  iniciarBlog();
+  iniciarSimulador();
+  iniciarModal();
+});
+</script>
+</body>
+</html>

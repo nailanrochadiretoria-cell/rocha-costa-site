@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Administrativo (demo) | Rocha Costa</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box card">
+    <div class="card-body">
+      <img src="img/logo-rocha-costa.png" alt="Rocha Costa Construtora" class="brand-logo" style="margin-bottom:20px;">
+      <h2>Painel administrativo</h2>
+      <p class="form-note" style="margin-bottom:16px;">Área restrita — versão de demonstração local.</p>
+      <form id="admin-login-form">
+        <div class="field" style="margin-bottom:16px;">
+          <label for="admin-senha">Senha</label>
+          <input id="admin-senha" type="password" required>
+        </div>
+        <p id="admin-login-erro" style="display:none;color:var(--red);font-size:.85rem;margin-bottom:12px;">Senha incorreta. Tente novamente.</p>
+        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+        <p class="form-note">Senha de demonstração: rochacosta2026</p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="admin-app" class="admin-shell" style="display:none;">
+  <aside class="admin-sidebar">
+    <div class="brand" style="color:#fff;margin-bottom:24px;"><span class="brand-mark">RC</span>Admin</div>
+    <a href="#" data-admin-secao="secao-dashboard" class="active">Dashboard</a>
+    <a href="#" data-admin-secao="secao-hero">Hero (Início)</a>
+    <a href="#" data-admin-secao="secao-empreendimentos">Empreendimentos</a>
+    <a href="#" data-admin-secao="secao-imoveis">Imóveis</a>
+    <a href="#" data-admin-secao="secao-depoimentos">Depoimentos</a>
+    <a href="#" style="margin-top:20px;border-top:1px solid rgba(255,255,255,.1);padding-top:16px;" id="admin-logout">Sair</a>
+    <a href="index.html" style="color:var(--gray-500);font-size:.82rem;">← Voltar para o site</a>
+  </aside>
+
+  <main class="admin-main">
+    <div class="badge-demo">
+      ✅ As alterações feitas aqui já ficam salvas no servidor (server/data/*.json) e aparecem para todos os visitantes do site. É uma senha única compartilhada (sem contas por pessoa) — troque-a em <code>server/.env</code> antes de publicar.
+    </div>
+
+    <section id="secao-dashboard" class="admin-section">
+      <h2>Dashboard</h2>
+      <div class="grid grid-3">
+        <div class="card"><div class="card-body"><h3 id="dash-hero-total">—</h3><p>Slides do hero</p></div></div>
+        <div class="card"><div class="card-body"><h3 id="dash-empreendimentos-total">—</h3><p>Empreendimentos</p></div></div>
+        <div class="card"><div class="card-body"><h3 id="dash-imoveis-total">—</h3><p>Imóveis cadastrados</p></div></div>
+        <div class="card"><div class="card-body"><h3 id="dash-depoimentos-total">—</h3><p>Depoimentos</p></div></div>
+      </div>
+    </section>
+
+    <section id="secao-hero" class="admin-section" style="display:none;">
+      <div class="admin-toolbar">
+        <h2 class="mt-0">Hero da página inicial</h2>
+      </div>
+      <table class="admin-table" style="margin-bottom:30px;">
+        <thead><tr><th>Imagem</th><th>Título</th><th>Botão leva para</th><th>Área manual</th><th>Ações</th></tr></thead>
+        <tbody id="admin-hero-tbody"></tbody>
+      </table>
+
+      <div class="form-card">
+        <h3 class="mt-0" id="form-hero-titulo-secao">Adicionar slide</h3>
+        <form id="form-hero">
+          <input type="hidden" id="hero-id">
+          <div class="form-row">
+            <div class="field"><label for="hero-eyebrow">Selo pequeno (eyebrow)</label><input id="hero-eyebrow" placeholder="Ex: Construtora em Petrolina-PE"></div>
+            <div class="field"><label for="hero-cta-texto">Texto do botão</label><input id="hero-cta-texto" required></div>
+          </div>
+          <div class="field" style="margin-bottom:16px;">
+            <label for="hero-titulo">Título (H1)</label>
+            <input id="hero-titulo" required>
+          </div>
+          <div class="field" style="margin-bottom:16px;">
+            <label for="hero-texto">Texto de apoio</label>
+            <textarea id="hero-texto" rows="3"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <label for="hero-cta-tipo">Botão leva para</label>
+              <select id="hero-cta-tipo">
+                <option value="imoveis">Empreendimentos (catálogo de imóveis)</option>
+                <option value="portfolio">Portfólio de obras</option>
+                <option value="simulador">Simulador de financiamento</option>
+                <option value="depoimentos">Depoimentos</option>
+                <option value="contato">Contato</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="url">URL personalizada</option>
+              </select>
+            </div>
+            <div class="field" id="hero-cta-valor-wrap" style="display:none;">
+              <label for="hero-cta-valor">URL personalizada</label>
+              <input id="hero-cta-valor" placeholder="https://...">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="field">
+              <label for="hero-imagem-arquivo">Imagem para desktop (upload)</label>
+              <input type="file" id="hero-imagem-arquivo" accept="image/png,image/jpeg,image/webp,image/gif">
+              <input type="text" id="hero-imagem-url" placeholder="ou cole a URL de uma imagem já publicada" style="margin-top:8px;">
+              <p class="form-note" id="hero-upload-status"></p>
+            </div>
+            <div class="field">
+              <label for="hero-imagem-mobile-arquivo">Imagem para celular (upload)</label>
+              <input type="file" id="hero-imagem-mobile-arquivo" accept="image/png,image/jpeg,image/webp,image/gif">
+              <input type="text" id="hero-imagem-mobile-url" placeholder="ou cole a URL de uma imagem já publicada" style="margin-top:8px;">
+              <p class="form-note" id="hero-upload-mobile-status"></p>
+              <p class="form-note" style="margin-top:6px;">Opcional. Se não enviar, a imagem de desktop também é usada no celular.</p>
+            </div>
+          </div>
+
+          <div class="field" style="margin-bottom:16px;">
+            <label class="checkbox-row" style="margin-bottom:10px;">
+              <input type="checkbox" id="hero-area-ativa">
+              <span>Esta imagem já tem um botão desenhado nela — definir manualmente a área clicável sobre a imagem (destino usa a opção "Botão leva para" acima)</span>
+            </label>
+            <div id="hero-area-editor-wrap" style="display:none;">
+              <p class="form-note" style="margin-top:0;">Arraste sobre a imagem para desenhar a área, ou ajuste os números abaixo. Sem detecção automática — 100% manual.</p>
+              <div class="area-editor" id="hero-area-editor">
+                <img id="hero-area-preview-img" alt="Prévia da imagem do slide">
+                <div class="area-editor-box" id="hero-area-box" style="display:none;"></div>
+              </div>
+              <div class="form-row" style="margin-top:14px;">
+                <div class="field"><label for="hero-area-x">X (%)</label><input type="number" id="hero-area-x" min="0" max="100" step="0.1" value="10"></div>
+                <div class="field"><label for="hero-area-y">Y (%)</label><input type="number" id="hero-area-y" min="0" max="100" step="0.1" value="10"></div>
+              </div>
+              <div class="form-row">
+                <div class="field"><label for="hero-area-largura">Largura (%)</label><input type="number" id="hero-area-largura" min="1" max="100" step="0.1" value="30"></div>
+                <div class="field"><label for="hero-area-altura">Altura (%)</label><input type="number" id="hero-area-altura" min="1" max="100" step="0.1" value="15"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-actions">
+            <button type="submit" class="btn btn-primary">Salvar slide</button>
+            <button type="button" id="hero-cancelar" class="btn btn-outline-navy">Limpar formulário</button>
+          </div>
+          <p class="form-note">As mudanças aparecem no site assim que você salvar — recarregue a home para ver.</p>
+        </form>
+      </div>
+    </section>
+
+    <section id="secao-empreendimentos" class="admin-section" style="display:none;">
+      <div class="admin-toolbar">
+        <h2 class="mt-0">Empreendimentos</h2>
+      </div>
+      <table class="admin-table" style="margin-bottom:30px;">
+        <thead><tr><th>Capa</th><th>Nome</th><th>Status</th><th>Ano</th><th>Unidades</th><th>Ações</th></tr></thead>
+        <tbody id="admin-empreendimentos-tbody"></tbody>
+      </table>
+
+      <div class="form-card">
+        <h3 class="mt-0" id="form-empreendimento-titulo-secao">Adicionar empreendimento</h3>
+        <form id="form-empreendimento">
+          <input type="hidden" id="emp-id">
+          <div class="form-row">
+            <div class="field"><label for="emp-nome">Nome</label><input id="emp-nome" required></div>
+            <div class="field">
+              <label for="emp-status">Status</label>
+              <select id="emp-status">
+                <option>Lançamento</option>
+                <option>Em construção</option>
+                <option>Entregue</option>
+              </select>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:16px;">
+            <label for="emp-descricao">Descrição</label>
+            <textarea id="emp-descricao" rows="3"></textarea>
+          </div>
+          <div class="field" style="margin-bottom:16px;">
+            <label for="emp-diferenciais">Diferenciais (um por linha)</label>
+            <textarea id="emp-diferenciais" rows="3" placeholder="Equipe própria de obra
+Documentação regularizada"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="field"><label for="emp-ano">Ano</label><input type="number" id="emp-ano" min="2000" max="2100"></div>
+            <div class="field"><label for="emp-total-unidades">Total de unidades</label><input type="number" id="emp-total-unidades" min="0"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label for="emp-lat">Latitude</label><input type="number" step="any" id="emp-lat" value="-9.3891"></div>
+            <div class="field"><label for="emp-lng">Longitude</label><input type="number" step="any" id="emp-lng" value="-40.5030"></div>
+          </div>
+
+          <div class="field" style="margin-bottom:16px;">
+            <label for="emp-imagens-arquivo">Fotos (pode selecionar várias de uma vez)</label>
+            <input type="file" id="emp-imagens-arquivo" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
+            <p class="form-note" id="emp-upload-status"></p>
+            <p class="form-note" style="margin-top:6px;">A primeira foto da lista é a capa (marcada em vermelho). Arraste as miniaturas para reordenar.</p>
+            <div id="emp-imagens-lista" class="admin-galeria"></div>
+          </div>
+
+          <div class="hero-actions">
+            <button type="submit" class="btn btn-primary">Salvar empreendimento</button>
+            <button type="button" id="emp-cancelar" class="btn btn-outline-navy">Limpar formulário</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="secao-imoveis" class="admin-section" style="display:none;">
+      <div class="admin-toolbar">
+        <h2 class="mt-0">Imóveis</h2>
+      </div>
+      <table class="admin-table" style="margin-bottom:30px;">
+        <thead><tr><th>ID</th><th>Título</th><th>Bairro</th><th>Status</th><th>Preço</th><th>Ações</th></tr></thead>
+        <tbody id="admin-imoveis-tbody"></tbody>
+      </table>
+
+      <div class="form-card" id="form-imovel-wrap">
+        <h3 class="mt-0">Adicionar / editar imóvel</h3>
+        <form id="form-imovel">
+          <input type="hidden" id="imovel-id">
+          <div class="form-row">
+            <div class="field"><label for="imovel-titulo">Título</label><input id="imovel-titulo" required></div>
+            <div class="field"><label for="imovel-bairro">Bairro</label><input id="imovel-bairro" required></div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label for="imovel-status">Status</label>
+              <select id="imovel-status">
+                <option>Lançamento</option>
+                <option>Em obras</option>
+                <option>Pronto para morar</option>
+              </select>
+            </div>
+            <div class="field"><label for="imovel-preco">Preço (R$)</label><input id="imovel-preco" type="number" required></div>
+          </div>
+          <div class="field" style="margin-bottom:18px;">
+            <label for="imovel-empreendimento">Empreendimento (opcional)</label>
+            <select id="imovel-empreendimento">
+              <option value="">Nenhum (imóvel avulso)</option>
+            </select>
+          </div>
+          <label class="checkbox-row" style="margin-bottom:18px;">
+            <input type="checkbox" id="imovel-destaque">
+            <span>Destacar na página inicial (aparece em "Imóveis em destaque")</span>
+          </label>
+          <div class="hero-actions">
+            <button type="submit" class="btn btn-primary">Salvar</button>
+            <button type="button" id="imovel-cancelar" class="btn btn-outline-navy">Limpar formulário</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="secao-depoimentos" class="admin-section" style="display:none;">
+      <h2>Depoimentos</h2>
+      <table class="admin-table" style="margin-bottom:30px;">
+        <thead><tr><th>Nome</th><th>Empreendimento</th><th>Nota</th><th>Ações</th></tr></thead>
+        <tbody id="admin-depoimentos-tbody"></tbody>
+      </table>
+
+      <div class="form-card">
+        <h3 class="mt-0">Adicionar depoimento</h3>
+        <form id="form-depoimento">
+          <div class="form-row">
+            <div class="field"><label for="dep-nome">Nome</label><input id="dep-nome" required></div>
+            <div class="field"><label for="dep-empreendimento">Empreendimento</label><input id="dep-empreendimento" required></div>
+          </div>
+          <div class="field" style="margin-bottom:16px;">
+            <label for="dep-estrelas">Nota (1 a 5)</label>
+            <select id="dep-estrelas">
+              <option>5</option><option>4</option><option>3</option><option>2</option><option>1</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:16px;">
+            <label for="dep-texto">Depoimento</label>
+            <textarea id="dep-texto" rows="3" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Adicionar</button>
+        </form>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/main.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
