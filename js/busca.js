@@ -48,23 +48,31 @@ function _extrairFiltrosImovel(consulta, imoveis) {
   const quartosMatch = consulta.match(/(\d+)\s*(quarto|dormitorio|qto)/);
   if (quartosMatch) filtros.quartos = Number(quartosMatch[1]);
 
-  const precoMatch = consulta.match(/(?:ate|até|abaixo de|menos de|maximo de|máximo de)?\s*r?\$?\s*(\d[\d.,]*)\s*(mil|k)?/);
-  if (precoMatch && precoMatch[1] && /\d/.test(precoMatch[1])) {
-    let valor = Number(precoMatch[1].replace(/\./g, '').replace(',', '.'));
-    if (precoMatch[2]) valor *= 1000;
-    if (valor >= 1000) filtros.precoMax = valor; // evita capturar "2 quartos" como preço
+  // Procura TODOS os números da frase (antes só o primeiro era olhado, então em
+  // "2 quartos até 300 mil" o "2" era lido como preço e o "300 mil" ignorado).
+  for (const m of consulta.matchAll(/(\d[\d.,]*)\s*(mil|k)?\b(?!\s*(?:quarto|dormitorio|qto|banheiro|vaga|m2|m²))/g)) {
+    let valor = Number(m[1].replace(/\./g, '').replace(',', '.'));
+    if (m[2]) valor *= 1000;
+    if (valor >= 1000) { filtros.precoMax = valor; break; } // números pequenos não são preço
   }
 
   return filtros;
 }
 
-async function _buscarImoveisRelevantes(consulta, filtros) {
-  let imoveis = [];
-  try {
-    imoveis = await apiGet('/api/imoveis');
-  } catch (e) {
-    return [];
+// Catálogo buscado uma vez só por página (antes eram 2 requisições por tecla digitada)
+let _buscaCatalogoPromise = null;
+function _catalogoBusca() {
+  if (!_buscaCatalogoPromise) {
+    _buscaCatalogoPromise = apiGet('/api/imoveis').catch(() => {
+      _buscaCatalogoPromise = null; // tenta de novo na próxima busca
+      return [];
+    });
   }
+  return _buscaCatalogoPromise;
+}
+
+async function _buscarImoveisRelevantes(consulta, filtros) {
+  const imoveis = await _catalogoBusca();
   const temFiltro = Object.keys(filtros).length > 0;
   let lista = imoveis;
   if (temFiltro) {
@@ -82,7 +90,7 @@ async function _buscarImoveisRelevantes(consulta, filtros) {
   return lista.slice(0, 5).map((im) => ({
     tipo: 'imovel',
     titulo: im.titulo,
-    meta: `${im.bairro}, ${im.cidade}/${im.estado} · ${formatarBRL(im.preco)}`,
+    meta: `${[im.bairro, im.cidade].filter(Boolean).join(', ')} · ${formatarPrecoImovel(im.preco)}`,
     url: `imovel.html?id=${im.id}`,
   }));
 }
@@ -100,7 +108,7 @@ async function _buscarTudo(consultaOriginal) {
   const consulta = _semAcento(consultaOriginal);
   if (consulta.length < 2) return [];
 
-  const imoveisTmp = await apiGet('/api/imoveis').catch(() => []);
+  const imoveisTmp = await _catalogoBusca();
   const filtros = _extrairFiltrosImovel(consulta, imoveisTmp);
   const temSinalImovel = Object.keys(filtros).length > 0;
 
@@ -122,9 +130,9 @@ function _renderResultadosBusca(lista, consulta) {
     return;
   }
   wrap.innerHTML = lista.map((r, i) => `
-    <a href="${r.url}" data-resultado-busca="${i}">
-      <span class="nsr-titulo">${r.titulo}</span>
-      <span class="nsr-meta">${r.meta}</span>
+    <a href="${escHTML(r.url)}" data-resultado-busca="${i}" style="animation-delay:${i * 40}ms">
+      <span class="nsr-titulo">${escHTML(r.titulo)}</span>
+      <span class="nsr-meta">${escHTML(r.meta)}</span>
     </a>`).join('');
 }
 
@@ -156,17 +164,33 @@ function iniciarBuscaHeader() {
     if (e.key === 'Escape') fechar();
   });
 
+  let buscaSeq = 0;
+  let buscaPendente = null;
+  function buscarAgora() {
+    const consulta = input.value;
+    const minhaSeq = ++buscaSeq;
+    buscaPendente = _buscarTudo(consulta).then((lista) => {
+      // Ignora respostas atrasadas: sem isso, uma busca antiga que termina
+      // depois sobrescreve o resultado da busca mais recente.
+      if (minhaSeq !== buscaSeq) return resultadosAtuais;
+      resultadosAtuais = lista;
+      _renderResultadosBusca(resultadosAtuais, _semAcento(consulta));
+      return lista;
+    });
+    return buscaPendente;
+  }
+
   input.addEventListener('input', () => {
     clearTimeout(debounceTimer);
-    const consulta = input.value;
-    debounceTimer = setTimeout(async () => {
-      resultadosAtuais = await _buscarTudo(consulta);
-      _renderResultadosBusca(resultadosAtuais, _semAcento(consulta));
-    }, 220);
+    debounceTimer = setTimeout(buscarAgora, 220);
   });
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    // Enter antes do debounce terminar: busca na hora com o texto atual
+    // (antes levava para o resultado da busca anterior, já desatualizado).
+    clearTimeout(debounceTimer);
+    if (input.value.trim().length >= 2) await buscarAgora();
     if (resultadosAtuais.length) {
       window.location.href = resultadosAtuais[0].url;
     } else if (input.value.trim()) {

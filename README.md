@@ -10,7 +10,8 @@ O site inteiro (páginas + API) é servido por um único processo Python.
 cd rocha-costa-site/server
 python3 -m venv .venv && source .venv/bin/activate   # opcional, mas recomendado
 pip install -r requirements.txt
-cp .env.example .env                                  # depois edite a senha e o segredo
+cp .env.example .env
+python definir_senha.py                               # define a senha do admin (grava só o hash)
 python3 app.py
 ```
 
@@ -22,7 +23,7 @@ Pré-requisito: **Python 3** instalado (não precisa de Node.js).
 
 Como agora existe um backend, a hospedagem deixou de ser "só arquivos estáticos" — precisa de um lugar que rode Python continuamente. Opções simples, sem servidor próprio:
 
-- **Render** ou **Railway** (planos gratuitos/baixo custo): conecte o repositório, comando de start `python3 server/app.py`, configure as variáveis de ambiente `ADMIN_PASSWORD` e `JWT_SECRET` no painel do serviço.
+- **Render** ou **Railway** (planos gratuitos/baixo custo): conecte o repositório, comando de start `python3 server/app.py`, configure as variáveis de ambiente `ADMIN_PASSWORD_HASH` (gerada por `server/definir_senha.py`) e `JWT_SECRET` no painel do serviço.
 - **Um VPS simples** (ex: Hostinger VPS, DigitalOcean): rodar com `gunicorn` + `systemd`/`pm2` para manter o processo no ar, atrás de um Nginx.
 
 Qualquer uma dessas opções funciona bem para o volume de acesso de um site institucional local. Antes de publicar, troque a senha padrão em `server/.env` (veja a seção Backend abaixo).
@@ -48,7 +49,7 @@ Qualquer uma dessas opções funciona bem para o volume de acesso de um site ins
 Como você indicou que ainda não tem fotos, textos e depoimentos reais, o site foi criado com **conteúdo de exemplo realista** para já dar pra visualizar e aprovar o formato. Troque quando tiver o material definitivo:
 
 - **Imóveis e depoimentos:** não são mais arquivos JS — agora moram em `server/data/imoveis.json` e `server/data/depoimentos.json` (criados automaticamente na primeira vez que o servidor roda). Edite direto pelo painel `admin.html`, ou editando os arquivos JSON manualmente com o servidor parado.
-- **Blog:** ainda é estático, em `js/blog-data.js` (não foi incluído no escopo do backend).
+- **Blog:** editado no admin (aba Blog), salvo em `server/data/blog.json`.
 - **Fotos:** hoje usam imagens de placeholder (picsum.photos). Troque o campo `imagem` de cada imóvel pela URL da foto real.
 - **Textos institucionais** (Sobre, história, timeline): direto em `sobre.html`, `index.html` e `portfolio.html`.
 
@@ -64,21 +65,17 @@ Como você indicou que ainda não tem fotos, textos e depoimentos reais, o site 
 - A mensagem já abre com saudação automática (Bom dia / Boa tarde / Boa noite conforme o horário) seguida de "Quero mais informações sobre o imóvel escolhido", exatamente como pedido.
 - Para trocar o número ou o texto padrão, edite `ROCHA_COSTA.whatsappNumber` em `js/main.js`.
 
-## Atendente de IA (balão de chat)
+## Editar o site pelo admin
 
-Todas as páginas voltadas ao público têm um balão de chat no canto inferior direito (`js/atendente.js`) com a "Marina", atendente virtual com tom conversacional e humanizado (não robótico). Ela conversa usando a API do Google Gemini. A chave de API **fica só no servidor** — nunca é enviada ao navegador do visitante.
+Tudo é editável em `admin.html`:
 
-Para ativar:
+- **Editar páginas**: abre a página escolhida em modo edição. Toque num texto para editar, numa imagem para trocar (upload) ou num botão/link para mudar o endereço, e depois em **Salvar**. Cabeçalho e rodapé são compartilhados por todas as páginas. As edições ficam em `server/data/conteudo.json` e o servidor aplica antes de enviar a página. "Restaurar textos originais" desfaz as edições de uma página.
+- **Slides do topo, Empreendimentos, Imóveis, Depoimentos, Blog**: cadastros completos (criar, editar, excluir, fotos).
+- **Configurações**: número e mensagem do WhatsApp, links do Instagram/Facebook (em branco = ícone escondido) e as duas cores do site.
 
-1. Gere sua chave grátis em [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — só precisa de login Google, sem cartão de crédito.
-2. Abra `server/.env` e cole a chave em `GEMINI_API_KEY=` (use `server/.env.example` como referência se o arquivo não existir ainda).
-3. Reinicie o servidor (`python3 app.py`).
+Os elementos editáveis são marcados nos arquivos HTML com `data-cms`, `data-cms-img` e `data-cms-link`. Ao criar uma página nova ou acrescentar texto no HTML, rode `python server/marcar_cms.py` para marcá-los (as chaves existentes são mantidas).
 
-Pronto — o atendente já responde perguntas sobre os imóveis cadastrados (lê `server/data/imoveis.json` em tempo real a cada mensagem), dúvidas gerais sobre a Rocha Costa, e direciona para o WhatsApp (87) 99914-3998 quando o visitante quer falar com um humano ou agendar visita. Sem a chave configurada, o balão continua aparecendo mas avisa que a IA não está ativa ainda — o resto do site funciona normalmente.
-
-- O modelo usado é configurável em `GEMINI_MODEL` (padrão `gemini-2.5-flash`).
-- O histórico da conversa fica em `sessionStorage` do navegador (some ao fechar a aba), não é salvo no servidor.
-- Para trocar o texto de boas-vindas ou o comportamento da IA, edite `MENSAGEM_BOAS_VINDAS` em `js/atendente.js` e `_prompt_sistema_atendente()` em `server/app.py`.
+O widget de chat com IA foi retirado do site (o arquivo foi removido; a rota `/api/atendente/chat` continua no servidor, sem uso).
 
 ## Formulário de contato — importante
 
@@ -94,7 +91,7 @@ Agora é um painel de verdade: login autentica contra o servidor, e criar/editar
 - Ao entrar, o servidor devolve um token (válido por 12h) guardado no navegador; toda ação de escrita (criar/editar/excluir) envia esse token — sem ele, a API recusa com erro 401.
 - **É uma senha única e compartilhada**, não contas individuais por pessoa. Serve bem para "só eu (ou minha equipe de confiança) mexo no site", mas não tem controle de permissões por usuário — se isso vier a ser necessário, é uma evolução futura.
 - A página tem `<meta name="robots" content="noindex, nofollow">` para não aparecer no Google.
-- **Antes de publicar o site**, troque a senha padrão: edite `server/.env` (`ADMIN_PASSWORD`) e reinicie o servidor. Nunca deixe a senha de teste (`rochacosta2026`) em produção.
+- **Senha do painel:** não existe mais senha padrão. Na pasta `server`, rode `python definir_senha.py`: ele pede a senha e grava no `.env` apenas o hash Argon2id (`ADMIN_PASSWORD_HASH`). Sem senha forte configurada, o login fica desligado. Trocar a senha derruba todas as sessões abertas.
 
 ## Backend (`server/`)
 

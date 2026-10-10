@@ -10,12 +10,14 @@ Se o site crescer muito, trocar por um banco real é só trocar este módulo.
 import json
 import os
 import threading
+from datetime import datetime, timezone
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 IMOVEIS_PATH = os.path.join(DATA_DIR, 'imoveis.json')
 DEPOIMENTOS_PATH = os.path.join(DATA_DIR, 'depoimentos.json')
 HERO_SLIDES_PATH = os.path.join(DATA_DIR, 'hero_slides.json')
 EMPREENDIMENTOS_PATH = os.path.join(DATA_DIR, 'empreendimentos.json')
+LEADS_PATH = os.path.join(DATA_DIR, 'leads.json')
 
 STATUS_EMPREENDIMENTO = ['Lançamento', 'Em construção', 'Entregue']
 
@@ -188,6 +190,8 @@ def _ensure_seeded():
         _write_json(HERO_SLIDES_PATH, _hero_slides_seed())
     if not os.path.exists(EMPREENDIMENTOS_PATH):
         _write_json(EMPREENDIMENTOS_PATH, _empreendimentos_seed())
+    if not os.path.exists(LEADS_PATH):
+        _write_json(LEADS_PATH, [])
 
 
 def _read_json(path):
@@ -392,3 +396,184 @@ def excluir_empreendimento(empreendimento_id):
 def imoveis_do_empreendimento(empreendimento_id):
     empreendimento_id = str(empreendimento_id)
     return [im for im in listar_imoveis() if str(im.get('empreendimento_id') or '') == empreendimento_id]
+
+
+def listar_leads():
+    _ensure_seeded()
+    with _lock:
+        lista = _read_json(LEADS_PATH)
+        return sorted(lista, key=lambda l: l['id'], reverse=True)
+
+
+def contar_leads():
+    _ensure_seeded()
+    with _lock:
+        return len(_read_json(LEADS_PATH))
+
+
+def criar_lead(dados):
+    with _lock:
+        lista = _read_json(LEADS_PATH)
+        proximo_id = (max((l['id'] for l in lista), default=0)) + 1
+        novo = {
+            'nome': '', 'telefone': '', 'email': '', 'mensagem': '', 'origem': 'contato',
+            **dados,
+            'id': proximo_id,
+            'criado_em': datetime.now(timezone.utc).isoformat(),
+            'lido': False,
+        }
+        lista.append(novo)
+        _write_json(LEADS_PATH, lista)
+        return novo
+
+
+def marcar_lead_lido(lead_id, lido=True):
+    lead_id = str(lead_id)
+    with _lock:
+        lista = _read_json(LEADS_PATH)
+        for idx, l in enumerate(lista):
+            if str(l['id']) == lead_id:
+                lista[idx] = {**l, 'lido': lido}
+                _write_json(LEADS_PATH, lista)
+                return lista[idx]
+        return None
+
+
+def excluir_lead(lead_id):
+    lead_id = str(lead_id)
+    with _lock:
+        lista = _read_json(LEADS_PATH)
+        nova_lista = [l for l in lista if str(l['id']) != lead_id]
+        if len(nova_lista) == len(lista):
+            return False
+        _write_json(LEADS_PATH, nova_lista)
+        return True
+
+
+# Garante os arquivos já na importação: as funções de criar/editar/excluir
+# leem o JSON direto e quebrariam se o arquivo ainda não existisse (ex.:
+# primeiro deploy, antes de qualquer GET).
+_ensure_seeded()
+
+
+# ---------- Blog, conteúdo editável das páginas e configurações ----------
+
+BLOG_PATH = os.path.join(DATA_DIR, 'blog.json')
+CONTEUDO_PATH = os.path.join(DATA_DIR, 'conteudo.json')
+CONFIG_PATH = os.path.join(DATA_DIR, 'configuracoes.json')
+
+CONFIG_PADRAO = {
+    'whatsapp_numero': '5587999143998',
+    'whatsapp_mensagem': 'Quero mais informações sobre o imóvel escolhido.',
+    'instagram_url': '',
+    'facebook_url': '',
+    'cor_principal': '#001F3E',
+    'cor_destaque': '#E3052D',
+}
+
+
+def _blog_seed():
+    return [
+        {'id': 1, 'titulo': 'Como funciona o financiamento pelo programa Minha Casa Minha Vida em 2026',
+         'resumo': 'Entenda as faixas de renda, taxas de juros e documentação necessária para financiar seu imóvel com condições facilitadas.',
+         'data': '2026-06-18', 'categoria': 'Financiamento', 'imagem': 'https://picsum.photos/seed/rochacostablog1/700/420',
+         'corpo': 'O programa habitacional facilita o acesso à casa própria por meio de subsídios e taxas de juros reduzidas, organizadas por faixas de renda familiar. Antes de assinar qualquer contrato, é fundamental reunir a documentação pessoal, comprovantes de renda e simular as condições junto ao agente financeiro.\n\nNa Rocha Costa, nossa equipe acompanha o cliente durante todo o processo de aprovação, desde a simulação inicial até a assinatura do contrato, reduzindo a burocracia e o tempo de espera.'},
+        {'id': 2, 'titulo': '5 sinais de que uma construtora entrega qualidade de verdade',
+         'resumo': 'Prazo, transparência, acabamento e suporte pós-obra: veja o que observar antes de fechar negócio.',
+         'data': '2026-05-30', 'categoria': 'Mercado imobiliário', 'imagem': 'https://picsum.photos/seed/rochacostablog2/700/420',
+         'corpo': 'Escolher uma construtora vai muito além do preço do imóvel. É importante avaliar o histórico de entregas no prazo, a qualidade dos materiais utilizados, a transparência na comunicação durante a obra e o suporte oferecido após a entrega das chaves.\n\nA Rocha Costa preza por manter o cliente informado em cada etapa, com visitas de acompanhamento e canal direto de atendimento.'},
+        {'id': 3, 'titulo': 'Petrolina em expansão: os bairros que mais crescem para investir',
+         'resumo': 'Um panorama dos bairros com maior valorização imobiliária na cidade nos últimos anos.',
+         'data': '2026-05-10', 'categoria': 'Investimento', 'imagem': 'https://picsum.photos/seed/rochacostablog3/700/420',
+         'corpo': 'Petrolina tem vivido um ciclo consistente de expansão urbana, impulsionado pelo agronegócio e pelo crescimento populacional. Bairros como Vila Eduardo, Areia Branca e Cidade Universitária vêm concentrando novos lançamentos residenciais e comerciais.\n\nPara quem pensa em investir, entender essas tendências de valorização é essencial antes de decidir onde comprar.'},
+    ]
+
+
+def _garantir(path, padrao):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    if not os.path.exists(path):
+        _write_json(path, padrao)
+
+
+def listar_posts():
+    with _lock:
+        _garantir(BLOG_PATH, _blog_seed())
+        return sorted(_read_json(BLOG_PATH), key=lambda p: (p.get('data') or '', p['id']), reverse=True)
+
+
+def obter_post(post_id):
+    return next((p for p in listar_posts() if str(p['id']) == str(post_id)), None)
+
+
+def salvar_post(dados, post_id=None):
+    with _lock:
+        _garantir(BLOG_PATH, _blog_seed())
+        lista = _read_json(BLOG_PATH)
+        if post_id is None:
+            novo = {'titulo': '', 'resumo': '', 'data': '', 'categoria': '', 'imagem': '', 'corpo': '', **dados,
+                    'id': max((p['id'] for p in lista), default=0) + 1}
+            lista.append(novo)
+            _write_json(BLOG_PATH, lista)
+            return novo
+        for idx, p in enumerate(lista):
+            if str(p['id']) == str(post_id):
+                lista[idx] = {**p, **dados, 'id': p['id']}
+                _write_json(BLOG_PATH, lista)
+                return lista[idx]
+        return None
+
+
+def excluir_post(post_id):
+    with _lock:
+        _garantir(BLOG_PATH, _blog_seed())
+        lista = _read_json(BLOG_PATH)
+        nova = [p for p in lista if str(p['id']) != str(post_id)]
+        if len(nova) == len(lista):
+            return False
+        _write_json(BLOG_PATH, nova)
+        return True
+
+
+def atualizar_depoimento(depoimento_id, dados):
+    with _lock:
+        lista = _read_json(DEPOIMENTOS_PATH)
+        for idx, d in enumerate(lista):
+            if str(d['id']) == str(depoimento_id):
+                lista[idx] = {**d, **dados, 'id': d['id']}
+                _write_json(DEPOIMENTOS_PATH, lista)
+                return lista[idx]
+        return None
+
+
+def obter_conteudo():
+    """{'textos': {chave: html}, 'imagens': {chave: url}, 'links': {chave: url}}"""
+    with _lock:
+        _garantir(CONTEUDO_PATH, {'textos': {}, 'imagens': {}, 'links': {}})
+        return _read_json(CONTEUDO_PATH)
+
+
+def salvar_conteudo(alteracoes, remover_prefixo=None):
+    with _lock:
+        _garantir(CONTEUDO_PATH, {'textos': {}, 'imagens': {}, 'links': {}})
+        atual = _read_json(CONTEUDO_PATH)
+        for tipo in ('textos', 'imagens', 'links'):
+            atual.setdefault(tipo, {})
+            if remover_prefixo:
+                atual[tipo] = {k: v for k, v in atual[tipo].items() if not k.startswith(remover_prefixo)}
+            atual[tipo].update((alteracoes or {}).get(tipo, {}))
+        _write_json(CONTEUDO_PATH, atual)
+        return atual
+
+
+def obter_config():
+    with _lock:
+        _garantir(CONFIG_PATH, CONFIG_PADRAO)
+        return {**CONFIG_PADRAO, **_read_json(CONFIG_PATH)}
+
+
+def salvar_config(dados):
+    with _lock:
+        _garantir(CONFIG_PATH, CONFIG_PADRAO)
+        atual = {**CONFIG_PADRAO, **_read_json(CONFIG_PATH), **dados}
+        _write_json(CONFIG_PATH, atual)
+        return atual

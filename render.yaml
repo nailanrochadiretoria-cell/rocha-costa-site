@@ -6,7 +6,9 @@ services:
     buildCommand: pip install -r server/requirements.txt
     startCommand: cd server && gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
-      - key: ADMIN_PASSWORD
+      - key: ADMIN_USER            # nome de usuário do painel (ex.: seu e-mail)
+        sync: false
+      - key: ADMIN_PASSWORD_HASH  # hash Argon2id gerado por server/definir_senha.py
         sync: false
       - key: JWT_SECRET
         generateValue: true

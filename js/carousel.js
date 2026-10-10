@@ -4,150 +4,217 @@
    o clone termina de entrar, então nunca há salto visível)
    ========================================================= */
 
-// ---- Hero: monta os slides a partir da API (editável em admin.html) ----
+// ---- Topo da home: banners que passam sozinhos (cadastrados no admin) ----
+// Cada banner tem imagem para computador, imagem para celular (opcional) e
+// um destino: tocar em qualquer parte da imagem leva para lá. Não há bolinhas,
+// setas nem arrastar — os banners simplesmente vão passando.
 const HERO_ROTAS = {
   imoveis: 'imoveis.html',
   portfolio: 'portfolio.html',
   simulador: 'simulador.html',
   depoimentos: 'depoimentos.html',
   contato: 'contato.html',
+  blog: 'blog.html',
+  sobre: 'sobre.html',
 };
+const HERO_INTERVALO = 5000; // tempo de cada banner na tela (ms)
 
 function _hrefDoSlideHero(slide) {
-  if (slide.cta_tipo === 'url') return slide.cta_valor || '#';
+  if (slide.cta_tipo === 'url') return slide.cta_valor || '';
+  if (slide.cta_tipo === 'imovel') return slide.cta_valor ? `imovel.html?id=${encodeURIComponent(slide.cta_valor)}` : '';
+  if (slide.cta_tipo === 'empreendimento') return slide.cta_valor ? `empreendimento.html?id=${encodeURIComponent(slide.cta_valor)}` : '';
   if (slide.cta_tipo === 'whatsapp') return '#';
-  return HERO_ROTAS[slide.cta_tipo] || '#';
+  if (slide.cta_tipo === 'nenhum') return '';
+  return HERO_ROTAS[slide.cta_tipo] || 'imoveis.html';
 }
 
-function _areaClicavelHeroHTML(slide) {
-  if (!slide.area_clicavel) return '';
-  const a = slide.area_clicavel;
-  const href = _hrefDoSlideHero(slide);
-  const waAttr = slide.cta_tipo === 'whatsapp' ? 'data-wa' : '';
-  const externo = slide.cta_tipo === 'url' ? ' target="_blank" rel="noopener"' : '';
-  return `<a href="${href}" ${waAttr}${externo} class="hero-area-clicavel"
-    style="left:${a.x}%;top:${a.y}%;width:${a.largura}%;height:${a.altura}%;"
-    aria-label="${slide.cta_texto || 'Saiba mais'}"></a>`;
-}
-
-// Slide em tela cheia: só a imagem (ou o fundo navy do .hero quando não há
-// imagem), sem selo/título/texto/estatísticas/botões sobrepostos. A área
-// clicável manual (definida no admin) continua funcionando sobre a imagem.
-function _slideHeroHTML(slide) {
-  const desktop = slide.imagem || slide.imagem_mobile;
-  if (!desktop) return '<div class="hero-slide"></div>';
-  const fonteMobile = slide.imagem_mobile && slide.imagem_mobile !== desktop
-    ? `<source media="(max-width: 767px)" srcset="${slide.imagem_mobile}">`
-    : '';
+// Topo padrão (sem banners cadastrados): título em dois tons à esquerda e
+// cartões flutuantes à direita, montados com imóveis reais do catálogo.
+function _slideTextoHTML(slide) {
   return `
-    <div class="hero-slide">
-      <div class="hero-imagem-wrap-full">
-        <picture>
-          ${fonteMobile}
-          <img class="hero-imagem-full" src="${desktop}" alt="${slide.titulo || ''}">
-        </picture>
-        ${_areaClicavelHeroHTML(slide)}
+    <div class="hero-slide hero-slide-padrao">
+      <div class="container hero-duplo">
+        <div class="hero-texto">
+          <h1 class="hero-anim">${escHTML(slide.titulo)} <span class="hero-tom2">${escHTML(slide.titulo2)}</span></h1>
+          <p class="lead hero-anim">${escHTML(slide.texto)}</p>
+          <div class="hero-actions hero-anim">
+            <a href="imoveis.html" class="btn btn-primary btn-brilho">Ver imóveis</a>
+            <a href="#" class="btn btn-outline" data-wa>Falar no WhatsApp</a>
+          </div>
+        </div>
+        <div class="hero-cartoes" id="hero-cartoes" aria-hidden="true"></div>
       </div>
     </div>`;
+}
+
+const HERO_SLIDE_PADRAO = {
+  titulo: 'Seu novo lar,',
+  titulo2: 'construído com qualidade e prazo cumprido.',
+  texto: 'Casas prontas para morar e na planta, com suporte completo no financiamento, inclusive Minha Casa Minha Vida.',
+};
+
+function _cartaoImovelHero(im, classe) {
+  const preco = typeof formatarPrecoImovel === 'function' ? formatarPrecoImovel(im.preco) : '';
+  return `
+    <a class="cartao-flutuante ${classe}" href="imovel.html?id=${encodeURIComponent(im.id)}" tabindex="-1">
+      <span class="cartao-foto"><img src="${urlSegura(im.imagem, 'img/logo-simbolo.png')}" alt="" onerror="this.onerror=null;this.src='img/logo-simbolo.png';this.classList.add('img-fallback')"></span>
+      <span class="cartao-info">
+        <span class="cartao-marca"><img src="img/logo-simbolo.png" alt="">Rocha Costa</span>
+        <span class="cartao-titulo">${escHTML(im.titulo)}</span>
+        <span class="cartao-linha"><span>${escHTML(im.bairro || im.cidade || '')}</span><strong>${preco}</strong></span>
+      </span>
+    </a>`;
+}
+
+// Cartões flutuantes: usa os imóveis em destaque (ou os mais recentes)
+async function montarCartoesHero() {
+  const wrap = document.getElementById('hero-cartoes');
+  if (!wrap) return;
+  let imoveis = [];
+  try {
+    imoveis = typeof carregarImoveis === 'function' ? await carregarImoveis() : await apiGet('/api/imoveis');
+  } catch (e) {
+    imoveis = [];
+  }
+  const marcados = imoveis.filter((im) => im.destaque);
+  const [a, b] = (marcados.length >= 2 ? marcados : [...imoveis].reverse());
+  if (!a) {
+    // Catálogo vazio: mostra a marca no lugar dos imóveis
+    wrap.innerHTML = '<div class="cartao-flutuante cartao-a cartao-so-marca"><img src="img/logo-rocha-costa-branca.png" alt=""></div>';
+  } else {
+    wrap.innerHTML = `
+      ${b ? _cartaoImovelHero(b, 'cartao-b') : ''}
+      ${_cartaoImovelHero(a, 'cartao-a')}
+      ${a.status ? `<span class="chip-flutuante chip-1"><span class="chip-icone">✓</span><span><strong>${escHTML(a.status)}</strong><small>${escHTML(a.titulo)}</small></span></span>` : ''}
+      <span class="chip-flutuante chip-2"><span class="chip-icone chip-icone--mcmv">R$</span><span><strong>Minha Casa Minha Vida</strong><small>Suporte no financiamento</small></span></span>`;
+  }
+  wrap.classList.add('pronto');
+
+  // Os cartões inclinam de leve acompanhando o mouse (profundidade)
+  const hero = wrap.closest('.hero');
+  if (hero && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    let quadro = null;
+    hero.addEventListener('pointermove', (e) => {
+      if (quadro) return;
+      quadro = requestAnimationFrame(() => {
+        quadro = null;
+        const r = hero.getBoundingClientRect();
+        wrap.style.setProperty('--px', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+        wrap.style.setProperty('--py', ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+      });
+    });
+    hero.addEventListener('pointerleave', () => {
+      wrap.style.setProperty('--px', 0);
+      wrap.style.setProperty('--py', 0);
+    });
+  }
+}
+
+function _slideBannerHTML(slide, usarImagemCelular) {
+  const href = _hrefDoSlideHero(slide);
+  const fonteCelular = usarImagemCelular
+    ? `<source media="(max-width: 767px)" srcset="${urlSegura(slide.imagem_mobile)}">`
+    : '';
+  const imagem = `
+    <picture>
+      ${fonteCelular}
+      <img class="hero-imagem-full" src="${urlSegura(slide.imagem)}" alt="${escHTML(slide.titulo || 'Banner Rocha Costa')}">
+    </picture>`;
+  if (!href) return `<div class="hero-slide hero-slide--imagem">${imagem}</div>`;
+  const wa = slide.cta_tipo === 'whatsapp' ? ' data-wa' : '';
+  const externo = slide.cta_tipo === 'url' && /^https?:/i.test(href) ? ' target="_blank" rel="noopener"' : '';
+  return `<a class="hero-slide hero-slide--imagem" href="${urlSegura(href, '#')}"${wa}${externo} aria-label="${escHTML(slide.titulo || 'Ver mais')}">${imagem}</a>`;
 }
 
 async function renderizarHeroSlides() {
   const track = document.getElementById('hero-track');
   if (!track) return;
+  const hero = track.closest('.hero');
   let slides = [];
   try {
     slides = await apiGet('/api/hero-slides');
   } catch (e) {
     slides = [];
   }
-  if (!slides.length) return;
-  track.innerHTML = slides.map(_slideHeroHTML).join('');
+  const banners = (Array.isArray(slides) ? slides : []).filter((s) => s.imagem);
+  if (!banners.length) {
+    hero.classList.remove('hero--banners', 'hero--celular-vertical');
+    track.innerHTML = _slideTextoHTML(HERO_SLIDE_PADRAO);
+    ligarBotoesWhatsApp(track);
+    montarCartoesHero();
+    return;
+  }
+  // No celular, o formato vertical só é usado se TODOS os banners tiverem a
+  // imagem de celular — senão, uma imagem de computador ficaria cortada.
+  const todosComCelular = banners.every((s) => s.imagem_mobile);
+  hero.classList.add('hero--banners');
+  hero.classList.toggle('hero--celular-vertical', todosComCelular);
+  track.innerHTML = banners.map((s) => _slideBannerHTML(s, todosComCelular)).join('');
   ligarBotoesWhatsApp(track);
 }
 
-// ---- Hero: carrossel de slides full-width, autoplay + dots + swipe (sem setas) ----
+// ---- Troca automática dos banners (loop infinito, sem controles) ----
 function iniciarHeroCarousel() {
   const track = document.getElementById('hero-track');
-  const dotsWrap = document.getElementById('hero-dots');
   if (!track) return;
 
   const originais = [...track.children];
-  if (originais.length <= 1) return; // nada para "circular"
+  if (originais.length <= 1) return; // um banner só: fica parado
 
-  const primeiroClone = originais[0].cloneNode(true);
-  const ultimoClone = originais[originais.length - 1].cloneNode(true);
-  primeiroClone.setAttribute('data-clone', '');
-  ultimoClone.setAttribute('data-clone', '');
-  track.appendChild(primeiroClone);
-  track.insertBefore(ultimoClone, track.firstChild);
+  // Clone do primeiro no fim: ao chegar nele, volta ao início sem salto visível
+  const clone = originais[0].cloneNode(true);
+  clone.setAttribute('data-clone', '');
+  clone.setAttribute('aria-hidden', 'true');
+  clone.setAttribute('tabindex', '-1');
+  track.appendChild(clone);
 
-  let idx = 1; // 1 = primeiro slide real (posição 0 é o clone do último)
+  let idx = 0;
   let timer;
+  let travaTimeout;
 
-  function aplicarTransform(comTransicao) {
+  function aplicar(comTransicao) {
     track.style.transition = comTransicao ? '' : 'none';
     track.style.transform = `translateX(-${idx * 100}%)`;
+    [...track.children].forEach((s, i) => s.classList.toggle('is-active', i === idx));
   }
-  function atualizarDots() {
-    if (!dotsWrap) return;
-    const pagina = ((idx - 1) % originais.length + originais.length) % originais.length;
-    [...dotsWrap.children].forEach((d, i) => d.classList.toggle('active', i === pagina));
-  }
-  function reiniciarAutoplay() {
-    clearInterval(timer);
-    timer = setInterval(() => mover(1), 6000);
-  }
-  function mover(delta) {
-    idx += delta;
-    aplicarTransform(true);
-    atualizarDots();
-    reiniciarAutoplay();
-  }
-  function irPara(pagina) {
-    idx = pagina + 1;
-    aplicarTransform(true);
-    atualizarDots();
-    reiniciarAutoplay();
-  }
-
-  // Quando a transição termina de deslizar para um slide "clone", teleporta
-  // instantaneamente (sem transição) para o slide real equivalente.
-  track.addEventListener('transitionend', (e) => {
-    if (e.target !== track) return;
-    if (idx >= originais.length + 1) {
-      idx = 1;
-      aplicarTransform(false);
-      void track.offsetWidth;
-    } else if (idx <= 0) {
-      idx = originais.length;
-      aplicarTransform(false);
+  function voltarAoInicioSeNoClone() {
+    clearTimeout(travaTimeout);
+    if (idx >= originais.length) {
+      idx = 0;
+      aplicar(false);
       void track.offsetWidth;
     }
-  });
-
-  if (dotsWrap) {
-    originais.forEach((_, i) => {
-      const dot = document.createElement('button');
-      dot.setAttribute('aria-label', `Slide ${i + 1}`);
-      dot.addEventListener('click', () => irPara(i));
-      dotsWrap.appendChild(dot);
-    });
+  }
+  function avancar() {
+    voltarAoInicioSeNoClone();
+    idx += 1;
+    aplicar(true);
+    // Rede de segurança: com a aba em segundo plano o "transitionend" pode não disparar
+    travaTimeout = setTimeout(voltarAoInicioSeNoClone, 1200);
+  }
+  function tocar() {
+    clearInterval(timer);
+    if (!document.hidden) timer = setInterval(avancar, HERO_INTERVALO);
   }
 
-  // swipe no touch
-  let startX = null;
-  track.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
-  track.addEventListener('touchend', (e) => {
-    if (startX === null) return;
-    const dx = e.changedTouches[0].clientX - startX;
-    if (Math.abs(dx) > 40) mover(dx < 0 ? 1 : -1);
-    startX = null;
+  track.addEventListener('transitionend', (e) => {
+    if (e.target === track) voltarAoInicioSeNoClone();
   });
+  // Só para de passar com a aba escondida (economia de bateria); ao voltar, continua
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) clearInterval(timer);
+    else { voltarAoInicioSeNoClone(); tocar(); }
+  });
+  window.addEventListener('resize', () => aplicar(false));
 
-  aplicarTransform(false); // posiciona no slide 1 sem animação inicial
-  atualizarDots();
-  reiniciarAutoplay();
-  window.addEventListener('resize', () => aplicarTransform(false));
+  aplicar(false);
+  tocar();
+}
+
+// Hero com 1 slide só: marca como ativo para a animação de entrada rodar
+function ativarSlideUnicoHero() {
+  const track = document.getElementById('hero-track');
+  if (track && track.children.length === 1) track.children[0].classList.add('is-active');
 }
 
 // ---- Slider genérico de cards (destaques, portfólio) — loop infinito ----
@@ -229,35 +296,63 @@ function iniciarSliderCards(sliderSelector) {
     track.style.transform = `translateX(-${idx * stepWidth()}px)`;
   }
 
+  let animando = false;
+  let travaTimeout;
+
+  function corrigirClone() {
+    animando = false;
+    clearTimeout(travaTimeout);
+    if (!loopAtivo) return;
+    const max = porView + originais.length - 1;
+    if (idx > max) {
+      idx -= originais.length;
+    } else if (idx < porView) {
+      idx += originais.length;
+    } else {
+      return;
+    }
+    aplicarTransform(false);
+    void track.offsetWidth;
+  }
+
   function mover(delta) {
-    idx += delta;
+    if (animando) return; // evita atravessar os clones com cliques rápidos (tela em branco)
+    if (loopAtivo) {
+      idx = Math.max(0, Math.min(porView * 2 + originais.length - 1, idx + delta));
+    } else {
+      // Sem loop (poucos cards): não deixa passar do último/primeiro
+      idx = Math.max(0, Math.min(totalPaginas() - 1, idx + delta));
+    }
+    animando = true;
+    clearTimeout(travaTimeout);
+    travaTimeout = setTimeout(corrigirClone, 800);
     aplicarTransform(true);
     atualizarDots();
   }
   function irPagina(pagina) {
+    if (animando) corrigirClone();
     idx = loopAtivo ? pagina + porView : Math.min(pagina, totalPaginas() - 1);
     aplicarTransform(true);
     atualizarDots();
   }
 
   track.addEventListener('transitionend', (e) => {
-    if (e.target !== track || !loopAtivo) return;
-    const max = porView + originais.length - 1;
-    if (idx > max) {
-      idx -= originais.length;
-      aplicarTransform(false);
-      void track.offsetWidth;
-    } else if (idx < porView) {
-      idx += originais.length;
-      aplicarTransform(false);
-      void track.offsetWidth;
-    }
+    if (e.target !== track) return;
+    corrigirClone();
   });
+
+  function atualizarSetas() {
+    // Setas e bolinhas só aparecem quando há o que rolar
+    const rolavel = originais.length > porView;
+    prevBtn?.classList.toggle('off', !rolavel);
+    nextBtn?.classList.toggle('off', !rolavel);
+    if (prevBtn) prevBtn.hidden = !rolavel;
+    if (nextBtn) nextBtn.hidden = !rolavel;
+    if (dotsWrap) dotsWrap.hidden = !rolavel;
+  }
 
   prevBtn?.addEventListener('click', () => mover(-1));
   nextBtn?.addEventListener('click', () => mover(1));
-  prevBtn?.classList.remove('off');
-  nextBtn?.classList.remove('off');
 
   let startX = null;
   viewport.addEventListener('touchstart', (e) => { startX = e.touches[0].clientX; }, { passive: true });
@@ -270,11 +365,23 @@ function iniciarSliderCards(sliderSelector) {
 
   montarClones();
   montarDots();
+  atualizarSetas();
   aplicarTransform(false);
 
+  // Só remonta quando a largura muda de verdade (no celular, a barra de
+  // endereço dispara "resize" ao rolar e fazia o slider pular para o início).
+  let larguraAnterior = window.innerWidth;
+  let resizeTimer;
   window.addEventListener('resize', () => {
-    montarClones();
-    montarDots();
-    aplicarTransform(false);
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (window.innerWidth === larguraAnterior) return;
+      larguraAnterior = window.innerWidth;
+      corrigirClone();
+      montarClones();
+      montarDots();
+      atualizarSetas();
+      aplicarTransform(false);
+    }, 150);
   });
 }

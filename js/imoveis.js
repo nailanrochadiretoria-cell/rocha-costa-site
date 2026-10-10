@@ -4,12 +4,33 @@
    ========================================================= */
 
 let IMOVEIS_CACHE = [];
+let _imoveisPromise = null;
 
+// Uma única requisição por página, mesmo se várias partes pedirem ao mesmo
+// tempo (antes, destaques + catálogo + relacionados buscavam em duplicidade).
 async function carregarImoveis() {
   if (IMOVEIS_CACHE.length) return IMOVEIS_CACHE;
-  IMOVEIS_CACHE = await apiGet('/api/imoveis');
-  return IMOVEIS_CACHE;
+  if (!_imoveisPromise) {
+    _imoveisPromise = apiGet('/api/imoveis')
+      .then((lista) => { IMOVEIS_CACHE = Array.isArray(lista) ? lista : []; return IMOVEIS_CACHE; })
+      .finally(() => { _imoveisPromise = null; });
+  }
+  return _imoveisPromise;
 }
+
+const IMAGEM_PADRAO_IMOVEL = 'img/logo-rocha-costa.png';
+
+// Obras (empreendimentos) por id, para mostrar no card a qual obra o imóvel pertence
+let OBRAS_POR_ID = {};
+async function carregarObras() {
+  try {
+    const lista = await apiGet('/api/empreendimentos');
+    OBRAS_POR_ID = Object.fromEntries(lista.map((e) => [String(e.id), e]));
+  } catch (e) {
+    OBRAS_POR_ID = {}; // sem as obras, o card só não mostra a linha da obra
+  }
+}
+const ICON_OBRA = '<svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 10h.01M15 10h.01"/></svg>';
 
 function badgeStatusClasse(status) {
   if (status === 'Pronto para morar') return 'tag--green';
@@ -24,21 +45,22 @@ const ICON_RULER = '<svg class="icon-sm" viewBox="0 0 16 16" xmlns="http://www.w
 
 function cardImovelHTML(im) {
   return `
-    <a class="card property-card" href="imovel.html?id=${im.id}" style="text-decoration:none;color:inherit;">
+    <a class="card property-card" href="imovel.html?id=${encodeURIComponent(im.id)}" style="text-decoration:none;color:inherit;">
       <div class="img-wrap">
-        <img src="${im.imagem}" alt="${im.titulo}" loading="lazy">
-        <span class="status-badge">${im.status}</span>
+        <img src="${urlSegura(im.imagem, IMAGEM_PADRAO_IMOVEL)}" alt="${escHTML(im.titulo)}" loading="lazy" onerror="this.onerror=null;this.src='${IMAGEM_PADRAO_IMOVEL}';this.classList.add('img-fallback')">
+        ${im.status ? `<span class="status-badge">${escHTML(im.status)}</span>` : ''}
       </div>
       <div class="card-body">
-        <span class="tag ${badgeStatusClasse(im.status)}">${im.tipo}</span>
-        <h3>${im.titulo}</h3>
-        <div class="meta">${im.bairro}, ${im.cidade}/${im.estado}</div>
-        <div class="property-price">${formatarBRL(im.preco)}</div>
+        ${im.tipo ? `<span class="tag ${badgeStatusClasse(im.status)}">${escHTML(im.tipo)}</span>` : ''}
+        <h3>${escHTML(im.titulo)}</h3>
+        <div class="meta">${escHTML(localImovel(im))}</div>
+        ${OBRAS_POR_ID[String(im.empreendimento_id)] ? `<div class="card-obra">${ICON_OBRA} ${escHTML(OBRAS_POR_ID[String(im.empreendimento_id)].nome)}</div>` : ''}
+        <div class="property-price">${formatarPrecoImovel(im.preco)}</div>
         <div class="property-specs">
-          ${im.quartos ? `<span>${ICON_BED} ${im.quartos} qto(s)</span>` : ''}
-          ${im.banheiros ? `<span>${ICON_SHOWER} ${im.banheiros} banh.</span>` : ''}
-          ${im.vagas ? `<span>${ICON_CAR} ${im.vagas} vaga(s)</span>` : ''}
-          <span>${ICON_RULER} ${im.area} m²</span>
+          ${im.quartos ? `<span>${ICON_BED} ${escHTML(im.quartos)} qto(s)</span>` : ''}
+          ${im.banheiros ? `<span>${ICON_SHOWER} ${escHTML(im.banheiros)} banh.</span>` : ''}
+          ${im.vagas ? `<span>${ICON_CAR} ${escHTML(im.vagas)} vaga(s)</span>` : ''}
+          ${im.area ? `<span>${ICON_RULER} ${escHTML(im.area)} m²</span>` : ''}
         </div>
       </div>
     </a>`;
@@ -46,18 +68,35 @@ function cardImovelHTML(im) {
 
 const ICON_SEARCH_EMPTY = '<svg class="icon-lg" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M15.0259 13.8474L18.5948 17.4163L17.4163 18.5948L13.8474 15.0259C12.5642 16.0525 10.9367 16.6667 9.16675 16.6667C5.02675 16.6667 1.66675 13.3067 1.66675 9.16669C1.66675 5.02669 5.02675 1.66669 9.16675 1.66669C13.3067 1.66669 16.6667 5.02669 16.6667 9.16669C16.6667 10.9367 16.0526 12.5641 15.0259 13.8474ZM13.354 13.229C14.373 12.1789 15.0001 10.7464 15.0001 9.16669C15.0001 5.94377 12.3897 3.33335 9.16675 3.33335C5.94383 3.33335 3.33341 5.94377 3.33341 9.16669C3.33341 12.3896 5.94383 15 9.16675 15C10.7464 15 12.1789 14.3729 13.2291 13.3539L13.354 13.229Z"/></svg>';
 
-function renderGridImoveis(lista, containerId) {
+// "Bairro, Cidade/UF" sem vírgulas ou barras sobrando quando falta algum campo
+function localImovel(im) {
+  const cidadeUf = [im.cidade, im.estado].filter(Boolean).join('/');
+  return [im.bairro, cidadeUf].filter(Boolean).join(', ');
+}
+
+function renderGridImoveis(lista, containerId, mensagemVazio) {
   const el = document.getElementById(containerId);
   if (!el) return;
   el.innerHTML = lista.length
     ? lista.map(cardImovelHTML).join('')
-    : `<div class="empty-state">${ICON_SEARCH_EMPTY}<p style="margin:0;">Nenhum imóvel encontrado com esses filtros.<br>Tente ampliar a busca.</p></div>`;
+    : `<div class="empty-state">${ICON_SEARCH_EMPTY}<p style="margin:0;">${mensagemVazio || 'Nenhum imóvel encontrado com esses filtros.<br>Tente ampliar a busca.'}</p></div>`;
+}
+
+function renderErroImoveis(containerId) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = `<div class="empty-state">${ICON_SEARCH_EMPTY}<p style="margin:0;">Não foi possível carregar os imóveis agora.<br><a href="#" data-wa>Fale com a gente pelo WhatsApp</a> ou tente recarregar a página.</p></div>`;
+  ligarBotoesWhatsApp(el);
+}
+
+function _normalizarBusca(txt) {
+  return String(txt || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 }
 
 function popularFiltros(imoveis) {
   const selBairro = document.getElementById('filtro-bairro');
   if (selBairro) {
-    const bairros = [...new Set(imoveis.map((im) => im.bairro))].sort();
+    const bairros = [...new Set(imoveis.map((im) => im.bairro).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
     bairros.forEach((b) => {
       const opt = document.createElement('option');
       opt.value = b; opt.textContent = b;
@@ -71,8 +110,11 @@ function lerFiltrosEAplicar() {
   const tipo = document.getElementById('filtro-tipo')?.value || '';
   const status = document.getElementById('filtro-status')?.value || '';
   const precoMax = document.getElementById('filtro-preco')?.value || '';
+  const textoOriginal = (document.getElementById('filtro-texto')?.value || '').trim();
+  const texto = _normalizarBusca(textoOriginal);
 
   const filtrados = IMOVEIS_CACHE.filter((im) => {
+    if (texto && !_normalizarBusca(`${im.titulo} ${im.bairro} ${im.tipo} ${im.descricao}`).includes(texto)) return false;
     if (bairro && im.bairro !== bairro) return false;
     if (tipo && im.tipo !== tipo) return false;
     if (status && im.status !== status) return false;
@@ -82,20 +124,68 @@ function lerFiltrosEAplicar() {
 
   renderGridImoveis(filtrados, 'imoveis-grid');
   const contagem = document.getElementById('resultados-count');
-  if (contagem) contagem.textContent = `${filtrados.length} imóvel(is) encontrado(s)`;
+  if (contagem) {
+    const n = filtrados.length;
+    contagem.textContent = `${n} ${n === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}${texto ? ` para “${textoOriginal}”` : ''}`;
+  }
 }
 
 async function iniciarCatalogoImoveis() {
   const grid = document.getElementById('imoveis-grid');
   if (!grid) return;
   grid.innerHTML = '<div class="loading-state"><span class="loading-spinner"></span>Carregando imóveis...</div>';
-  const imoveis = await carregarImoveis();
+  let imoveis;
+  try {
+    [imoveis] = await Promise.all([carregarImoveis(), carregarObras()]);
+  } catch (e) {
+    renderErroImoveis('imoveis-grid');
+    return;
+  }
   popularFiltros(imoveis);
+
+  // Filtros vindos da URL: busca do header (?busca=) e bairro (?bairro=).
+  // Antes o header mandava ?busca= mas a página ignorava o parâmetro.
+  const params = new URLSearchParams(location.search);
+  const campoTexto = document.getElementById('filtro-texto');
+  if (campoTexto && params.get('busca')) campoTexto.value = params.get('busca');
+  const selBairro = document.getElementById('filtro-bairro');
+  if (selBairro && params.get('bairro')) selBairro.value = params.get('bairro');
+
   ['filtro-bairro', 'filtro-tipo', 'filtro-status', 'filtro-preco'].forEach((id) => {
     document.getElementById(id)?.addEventListener('change', lerFiltrosEAplicar);
   });
+  // Celular: filtros recolhidos atrás de um botão (a barra inteira ocupava a tela)
+  const barraFiltros = document.getElementById('filtros-imoveis');
+  if (barraFiltros && !barraFiltros.querySelector('.filtros-toggle')) {
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'btn btn-outline-navy filtros-toggle';
+    toggle.setAttribute('aria-expanded', 'false');
+    const rotulo = () => {
+      const ativos = ['filtro-bairro', 'filtro-tipo', 'filtro-status', 'filtro-preco']
+        .filter((id) => document.getElementById(id)?.value).length;
+      return `Filtros${ativos ? ` (${ativos})` : ''}`;
+    };
+    toggle.textContent = rotulo();
+    toggle.addEventListener('click', () => {
+      const aberto = barraFiltros.classList.toggle('filtros-abertos');
+      toggle.setAttribute('aria-expanded', String(aberto));
+    });
+    barraFiltros.querySelector('.field-busca')?.after(toggle);
+    barraFiltros.addEventListener('change', () => { toggle.textContent = rotulo(); });
+    document.getElementById('filtro-limpar')?.addEventListener('click', () => { toggle.textContent = rotulo(); });
+    if (params.get('bairro')) barraFiltros.classList.add('filtros-abertos');
+  }
+
+  let debounce;
+  campoTexto?.addEventListener('input', () => {
+    clearTimeout(debounce);
+    debounce = setTimeout(lerFiltrosEAplicar, 200);
+  });
   document.getElementById('filtro-limpar')?.addEventListener('click', () => {
     document.querySelectorAll('#filtros-imoveis select').forEach((s) => (s.value = ''));
+    if (campoTexto) campoTexto.value = '';
+    history.replaceState(null, '', location.pathname);
     lerFiltrosEAplicar();
   });
   lerFiltrosEAplicar();
@@ -104,7 +194,17 @@ async function iniciarCatalogoImoveis() {
 async function iniciarDestaquesHome() {
   const grid = document.getElementById('destaques-grid');
   if (!grid) return;
-  const imoveis = await carregarImoveis();
+  let imoveis;
+  try {
+    [imoveis] = await Promise.all([carregarImoveis(), carregarObras()]);
+  } catch (e) {
+    renderErroImoveis('destaques-grid');
+    return;
+  }
+  if (!imoveis.length) {
+    renderGridImoveis([], 'destaques-grid', 'Em breve novos imóveis por aqui.');
+    return;
+  }
   const marcados = imoveis.filter((im) => im.destaque);
   // Se ninguém marcou "destaque" ainda no admin, mostra os imóveis mais recentes
   // em vez de deixar a seção vazia.

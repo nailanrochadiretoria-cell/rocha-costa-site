@@ -1,6 +1,93 @@
-server/.env
-.DS_Store
-__pycache__/
-*.pyc
+# =========================================================
+# Rocha Costa — o que NUNCA vai para o GitHub / produção
+# =========================================================
+
+# ---------- Segredos: senhas, chaves, tokens ----------
+# Qualquer .env (em qualquer pasta), menos o modelo sem valores reais
+.env
+.env.*
+*.env
+!.env.example
+!**/.env.example
+
+# Chaves e certificados
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+*.jks
+*.keystore
+id_rsa*
+id_ed25519*
+*.ppk
+
+# Credenciais de serviços (Google, Firebase, AWS etc.)
+credentials.json
+credentials*.json
+service-account*.json
+*serviceAccount*.json
+client_secret*.json
+.aws/
+.netrc
+.npmrc
+.pypirc
+secrets.*
+*.secret
+
+# ---------- Dados de clientes (LGPD) ----------
+# Contatos recebidos pelo formulário do site
+server/data/leads.json
+server/data/*.tmp
+# Cópias de segurança e exportações dos dados
+*.bak
+*.backup
+server/data/*.csv
+server/data/backup*/
+
+# ---------- Dependências instaladas (são recriadas com pip/npm install) ----------
+node_modules/
 .venv/
 venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---------- Configurações locais da máquina / do editor ----------
+.claude/
+.vscode/
+.idea/
+*.code-workspace
+*.swp
+*.swo
+*~
+.vercel/
+.netlify/
+.firebase/
+*.local
+*.local.*
+
+# ---------- Sistema operacional ----------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ---------- Logs, temporários e pacotes gerados ----------
+*.log
+logs/
+*.tmp
+tmp/
+temp/
+*.zip
+*.tar.gz
+dist/
+build/
