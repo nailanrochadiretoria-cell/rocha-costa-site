@@ -7,10 +7,6 @@
    de quem está editando.
    ========================================================= */
 
-function adminEstaLogado() {
-  return !!getAdminToken();
-}
-
 function mostrarErroLogin(mensagem) {
   const erro = document.getElementById('admin-login-erro');
   erro.textContent = mensagem;
@@ -23,6 +19,46 @@ function entrarNoPainel(usuario) {
   const campoUsuario = document.getElementById('acesso-usuario');
   if (campoUsuario && usuario) campoUsuario.value = usuario;
   iniciarPainelAdmin();
+}
+
+// ---- Avisos rápidos no canto da tela (no lugar das caixas de alerta do navegador) ----
+function avisar(mensagem, tipo = 'ok') {
+  let pilha = document.getElementById('admin-avisos');
+  if (!pilha) {
+    pilha = document.createElement('div');
+    pilha.id = 'admin-avisos';
+    pilha.className = 'admin-avisos';
+    pilha.setAttribute('aria-live', 'polite');
+    document.body.appendChild(pilha);
+  }
+  const aviso = document.createElement('div');
+  aviso.className = `admin-aviso admin-aviso--${tipo}`;
+  aviso.setAttribute('role', tipo === 'erro' ? 'alert' : 'status');
+  aviso.textContent = mensagem;
+  pilha.appendChild(aviso);
+  setTimeout(() => {
+    aviso.classList.add('saindo');
+    setTimeout(() => aviso.remove(), 400);
+  }, tipo === 'erro' ? 7000 : 3500);
+}
+
+// Desliga o botão "Salvar" enquanto a requisição não volta (evita salvar duas vezes)
+async function comBotaoOcupado(form, tarefa) {
+  const botao = form.querySelector('button[type="submit"]');
+  if (botao?.disabled) return;
+  const texto = botao?.textContent;
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = 'Salvando...';
+  }
+  try {
+    await tarefa();
+  } finally {
+    if (botao) {
+      botao.disabled = false;
+      botao.textContent = texto;
+    }
+  }
 }
 
 // ---- Verificação por imagem (CAPTCHA) do login ----
@@ -233,8 +269,8 @@ async function renderAdminImoveis() {
       <td>${escHTML(im.status)}</td>
       <td>${formatarPrecoImovel(im.preco)}</td>
       <td>
-        <button class="btn btn-sm btn-outline-navy" data-editar-imovel="${im.id}">Editar</button>
-        <button class="btn btn-sm btn-primary" data-excluir-imovel="${im.id}">Excluir</button>
+        <button class="btn btn-sm btn-outline-navy" data-editar-imovel="${escHTML(im.id)}">Editar</button>
+        <button class="btn btn-sm btn-primary" data-excluir-imovel="${escHTML(im.id)}">Excluir</button>
       </td>
     </tr>`).join('');
 
@@ -244,10 +280,13 @@ async function renderAdminImoveis() {
       const id = btn.getAttribute('data-excluir-imovel');
       try {
         await apiAuth(`/api/imoveis/${id}`, 'DELETE');
+        if (document.getElementById('imovel-id').value === id) limparFormImovel();
         renderAdminImoveis();
+        renderAdminDashboard();
+        avisar('Imóvel excluído.');
       } catch (err) {
         if (err.sessaoExpirada) return tratarSessaoExpirada();
-        alert(err.message);
+        avisar(err.message, 'erro');
       }
     });
   });
@@ -258,7 +297,7 @@ async function renderAdminImoveis() {
       try {
         item = await apiGet(`/api/imoveis/${id}`);
       } catch (err) {
-        alert('Não foi possível carregar este imóvel. Ele pode ter sido excluído.');
+        avisar('Não foi possível carregar este imóvel. Ele pode ter sido excluído.', 'erro');
         renderAdminImoveis();
         return;
       }
@@ -286,6 +325,8 @@ async function renderAdminImoveis() {
         ? 'Este imóvel tem posição própria no mapa. Apague o campo para voltar a usar a da obra/bairro.'
         : 'Em branco, o mapa do imóvel mostra a posição da obra escolhida acima ou, se não houver obra, o bairro.';
       atualizarPreviewImovel();
+      document.getElementById('imovel-upload-status').textContent = '';
+      modoEdicao('imovel', `Editar imóvel: ${item.titulo || ''}`);
       document.getElementById('form-imovel').scrollIntoView({ behavior: 'smooth' });
     });
   });
@@ -308,6 +349,23 @@ function limparFormImovel() {
   document.getElementById('imovel-lng').value = '';
   document.getElementById('imovel-mapa-status').textContent = 'Em branco, o mapa do imóvel mostra a posição da obra escolhida acima ou, se não houver obra, o bairro.';
   atualizarPreviewImovel();
+  modoEdicao('imovel', null);
+}
+
+// Título do formulário + texto do botão "Limpar" mudam quando um item está sendo editado
+const _TITULOS_NOVO = {
+  imovel: ['form-imovel-titulo-secao', 'Adicionar imóvel', 'imovel-cancelar'],
+  emp: ['form-empreendimento-titulo-secao', 'Adicionar empreendimento', 'emp-cancelar'],
+  dep: ['form-depoimento-titulo', 'Adicionar depoimento', 'dep-cancelar'],
+  blog: ['form-blog-titulo-secao', 'Novo artigo', 'blog-cancelar'],
+};
+function modoEdicao(qual, titulo) {
+  const [idTitulo, tituloNovo, idCancelar] = _TITULOS_NOVO[qual];
+  const el = document.getElementById(idTitulo);
+  if (el) el.textContent = titulo || tituloNovo;
+  const cancelar = document.getElementById(idCancelar);
+  if (cancelar) cancelar.textContent = titulo ? 'Cancelar edição' : 'Limpar formulário';
+  el?.closest('.form-card')?.classList.toggle('form-card--editando', !!titulo);
 }
 
 function iniciarFormImovel() {
@@ -345,10 +403,12 @@ function iniciarFormImovel() {
     e.target.value = '';
   });
 
-  let salvando = false;
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (salvando) return; // clique duplo não cria o imóvel duas vezes
+    comBotaoOcupado(form, () => salvarImovel());
+  });
+
+  async function salvarImovel() {
     const idCampo = document.getElementById('imovel-id').value;
     const num = (id) => Number(document.getElementById(id).value) || 0;
     const dados = {
@@ -370,7 +430,6 @@ function iniciarFormImovel() {
         ? { lat: Number(document.getElementById('imovel-lat').value), lng: Number(document.getElementById('imovel-lng').value) }
         : null,
     };
-    salvando = true;
     try {
       if (idCampo) {
         await apiAuth(`/api/imoveis/${idCampo}`, 'PUT', dados);
@@ -380,13 +439,12 @@ function iniciarFormImovel() {
       limparFormImovel();
       renderAdminImoveis();
       renderAdminDashboard();
+      avisar(idCampo ? 'Imóvel atualizado!' : 'Imóvel cadastrado!');
     } catch (err) {
       if (err.sessaoExpirada) return tratarSessaoExpirada();
-      alert(err.message);
-    } finally {
-      salvando = false;
+      avisar(err.message, 'erro');
     }
-  });
+  }
 
   document.getElementById('imovel-cancelar')?.addEventListener('click', limparFormImovel);
 }
@@ -433,7 +491,7 @@ async function renderAdminDepoimentos() {
       document.getElementById('dep-empreendimento').value = d.empreendimento || '';
       document.getElementById('dep-texto').value = d.texto || '';
       document.getElementById('dep-estrelas').value = String(d.estrelas || 5);
-      document.getElementById('form-depoimento-titulo').textContent = 'Editar depoimento';
+      modoEdicao('dep', `Editar depoimento de ${d.nome || ''}`);
       document.getElementById('dep-salvar').textContent = 'Salvar alterações';
       document.getElementById('form-depoimento').scrollIntoView({ behavior: 'smooth' });
     });
@@ -445,10 +503,13 @@ async function renderAdminDepoimentos() {
       const id = btn.getAttribute('data-excluir-depoimento');
       try {
         await apiAuth(`/api/depoimentos/${id}`, 'DELETE');
+        if (document.getElementById('dep-id').value === id) limparFormDepoimento();
         renderAdminDepoimentos();
+        renderAdminDashboard();
+        avisar('Depoimento excluído.');
       } catch (err) {
         if (err.sessaoExpirada) return tratarSessaoExpirada();
-        alert(err.message);
+        avisar(err.message, 'erro');
       }
     });
   });
@@ -457,15 +518,18 @@ async function renderAdminDepoimentos() {
 function limparFormDepoimento() {
   document.getElementById('form-depoimento').reset();
   document.getElementById('dep-id').value = '';
-  document.getElementById('form-depoimento-titulo').textContent = 'Adicionar depoimento';
+  modoEdicao('dep', null);
   document.getElementById('dep-salvar').textContent = 'Adicionar';
 }
 
 function iniciarFormDepoimento() {
   const form = document.getElementById('form-depoimento');
   if (!form) return;
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
+    comBotaoOcupado(form, salvarDepoimento);
+  });
+  async function salvarDepoimento() {
     const id = document.getElementById('dep-id').value;
     const dados = {
       nome: document.getElementById('dep-nome').value,
@@ -482,11 +546,12 @@ function iniciarFormDepoimento() {
       limparFormDepoimento();
       renderAdminDepoimentos();
       renderAdminDashboard();
+      avisar(id ? 'Depoimento atualizado!' : 'Depoimento adicionado!');
     } catch (err) {
       if (err.sessaoExpirada) return tratarSessaoExpirada();
-      alert(err.message);
+      avisar(err.message, 'erro');
     }
-  });
+  }
   document.getElementById('dep-cancelar')?.addEventListener('click', limparFormDepoimento);
 }
 
@@ -495,7 +560,16 @@ function limparFormBlog() {
   document.getElementById('form-blog').reset();
   document.getElementById('blog-id').value = '';
   document.getElementById('blog-upload-status').textContent = '';
-  document.getElementById('form-blog-titulo-secao').textContent = 'Novo artigo';
+  atualizarPreviewBlog();
+  modoEdicao('blog', null);
+}
+
+function atualizarPreviewBlog() {
+  const url = document.getElementById('blog-imagem')?.value.trim();
+  const img = document.getElementById('blog-imagem-preview');
+  if (!img) return;
+  img.hidden = !url;
+  if (url) img.src = url;
 }
 
 async function renderAdminBlog() {
@@ -535,20 +609,25 @@ async function renderAdminBlog() {
       document.getElementById('blog-resumo').value = p.resumo || '';
       document.getElementById('blog-corpo').value = p.corpo || '';
       document.getElementById('blog-imagem').value = p.imagem || '';
-      document.getElementById('form-blog-titulo-secao').textContent = 'Editar artigo';
+      document.getElementById('blog-upload-status').textContent = '';
+      atualizarPreviewBlog();
+      modoEdicao('blog', `Editar artigo: ${p.titulo || ''}`);
       document.getElementById('form-blog').scrollIntoView({ behavior: 'smooth' });
     });
   });
   tbody.querySelectorAll('[data-excluir-post]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       if (!confirm('Excluir este artigo?')) return;
+      const id = btn.getAttribute('data-excluir-post');
       try {
-        await apiAuth(`/api/blog/${btn.getAttribute('data-excluir-post')}`, 'DELETE');
+        await apiAuth(`/api/blog/${id}`, 'DELETE');
+        if (document.getElementById('blog-id').value === id) limparFormBlog();
         renderAdminBlog();
         renderAdminDashboard();
+        avisar('Artigo excluído.');
       } catch (err) {
         if (err.sessaoExpirada) return tratarSessaoExpirada();
-        alert(err.message);
+        avisar(err.message, 'erro');
       }
     });
   });
@@ -565,6 +644,7 @@ function iniciarFormBlog() {
     try {
       const { url } = await apiUploadImagem(arquivo);
       document.getElementById('blog-imagem').value = url;
+      atualizarPreviewBlog();
       status.textContent = 'Imagem enviada. Clique em "Salvar artigo".';
     } catch (err) {
       if (err.sessaoExpirada) return tratarSessaoExpirada();
@@ -572,8 +652,12 @@ function iniciarFormBlog() {
     }
     e.target.value = '';
   });
-  form.addEventListener('submit', async (e) => {
+  document.getElementById('blog-imagem').addEventListener('input', atualizarPreviewBlog);
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
+    comBotaoOcupado(form, salvarArtigo);
+  });
+  async function salvarArtigo() {
     const id = document.getElementById('blog-id').value;
     const dados = {
       titulo: document.getElementById('blog-titulo').value,
@@ -589,11 +673,12 @@ function iniciarFormBlog() {
       limparFormBlog();
       renderAdminBlog();
       renderAdminDashboard();
+      avisar(id ? 'Artigo atualizado!' : 'Artigo publicado!');
     } catch (err) {
       if (err.sessaoExpirada) return tratarSessaoExpirada();
-      alert(err.message);
+      avisar(err.message, 'erro');
     }
-  });
+  }
   document.getElementById('blog-cancelar').addEventListener('click', limparFormBlog);
 }
 
@@ -620,14 +705,18 @@ async function carregarConfigAdmin() {
   document.getElementById('cfg-facebook').value = cfg.facebook_url || '';
   document.getElementById('cfg-cor-principal').value = cfg.cor_principal || CORES_ORIGINAIS.principal;
   document.getElementById('cfg-cor-destaque').value = cfg.cor_destaque || CORES_ORIGINAIS.destaque;
+  preencherFormSimulador(cfg.simulador || SIMULADOR_SUGERIDO);
 }
 
 function iniciarFormConfig() {
   const form = document.getElementById('form-config');
   if (!form) return;
   const status = document.getElementById('cfg-status');
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
+    comBotaoOcupado(form, salvarConfig);
+  });
+  async function salvarConfig() {
     let numero = document.getElementById('cfg-whatsapp').value.replace(/\D/g, '');
     if (numero.length === 10 || numero.length === 11) numero = `55${numero}`; // DDD + número → com código do Brasil
     if (numero.length < 12) {
@@ -643,13 +732,14 @@ function iniciarFormConfig() {
         cor_principal: document.getElementById('cfg-cor-principal').value,
         cor_destaque: document.getElementById('cfg-cor-destaque').value,
       });
-      status.textContent = 'Configurações salvas! Já valem para todo o site.';
+      status.textContent = '';
+      avisar('Configurações salvas! Já valem para todo o site.');
       carregarConfigAdmin();
     } catch (err) {
       if (err.sessaoExpirada) return tratarSessaoExpirada();
       status.textContent = `Erro: ${err.message}`;
     }
-  });
+  }
   document.getElementById('cfg-cores-padrao').addEventListener('click', () => {
     document.getElementById('cfg-cor-principal').value = CORES_ORIGINAIS.principal;
     document.getElementById('cfg-cor-destaque').value = CORES_ORIGINAIS.destaque;
@@ -703,14 +793,15 @@ function iniciarEditorPaginas() {
       await apiAuth(`/api/conteudo/${select.value.replace('.html', '')}`, 'DELETE');
       pendentes = 0;
       carregar();
+      avisar('Textos originais restaurados.');
     } catch (err) {
       if (err.sessaoExpirada) return tratarSessaoExpirada();
-      alert(err.message);
+      avisar(err.message, 'erro');
     }
   });
   // Só carrega o iframe quando a aba é aberta (evita pesar o painel à toa)
-  document.querySelector('[data-admin-secao="secao-paginas"]')?.addEventListener('click', () => {
-    if (!iframe.src) carregar();
+  document.addEventListener('admin:abriu-paginas', () => {
+    if (!iframe.getAttribute('src')) carregar();
   });
 }
 
@@ -743,8 +834,8 @@ async function renderAdminEmpreendimentos() {
       <td>${escHTML(emp.ano) || '—'}</td>
       <td>${escHTML(emp.total_unidades) || '—'}</td>
       <td>
-        <button class="btn btn-sm btn-outline-navy" data-editar-emp="${emp.id}">Editar</button>
-        <button class="btn btn-sm btn-primary" data-excluir-emp="${emp.id}">Excluir</button>
+        <button class="btn btn-sm btn-outline-navy" data-editar-emp="${escHTML(emp.id)}">Editar</button>
+        <button class="btn btn-sm btn-primary" data-excluir-emp="${escHTML(emp.id)}">Excluir</button>
       </td>
     </tr>`).join('');
 
@@ -754,12 +845,14 @@ async function renderAdminEmpreendimentos() {
       const id = btn.getAttribute('data-excluir-emp');
       try {
         await apiAuth(`/api/empreendimentos/${id}`, 'DELETE');
+        if (document.getElementById('emp-id').value === id) limparFormEmpreendimento();
         renderAdminEmpreendimentos();
         renderAdminDashboard();
         popularSelectEmpreendimentos();
+        avisar('Empreendimento excluído.');
       } catch (err) {
         if (err.sessaoExpirada) return tratarSessaoExpirada();
-        alert(err.message);
+        avisar(err.message, 'erro');
       }
     });
   });
@@ -770,7 +863,7 @@ async function renderAdminEmpreendimentos() {
       try {
         item = await apiGet(`/api/empreendimentos/${id}`);
       } catch (err) {
-        alert('Não foi possível carregar este empreendimento. Ele pode ter sido excluído.');
+        avisar('Não foi possível carregar este empreendimento. Ele pode ter sido excluído.', 'erro');
         renderAdminEmpreendimentos();
         return;
       }
@@ -860,7 +953,8 @@ function preencherFormEmpreendimento(item) {
   document.getElementById('emp-total-unidades').value = item.total_unidades || '';
   document.getElementById('emp-lat').value = item.localizacao ? item.localizacao.lat : -9.3891;
   document.getElementById('emp-lng').value = item.localizacao ? item.localizacao.lng : -40.5030;
-  document.getElementById('form-empreendimento-titulo-secao').textContent = 'Editar empreendimento';
+  modoEdicao('emp', `Editar empreendimento: ${item.nome || ''}`);
+  document.getElementById('emp-upload-status').textContent = '';
   _empGaleriaAtual = [...(item.imagens || [])];
   renderGaleriaEmpreendimento();
   document.getElementById('emp-mapa-link').value = '';
@@ -873,7 +967,7 @@ function limparFormEmpreendimento() {
   document.getElementById('emp-id').value = '';
   document.getElementById('emp-lat').value = -9.3891;
   document.getElementById('emp-lng').value = -40.5030;
-  document.getElementById('form-empreendimento-titulo-secao').textContent = 'Adicionar empreendimento';
+  modoEdicao('emp', null);
   document.getElementById('emp-upload-status').textContent = '';
   _empGaleriaAtual = [];
   renderGaleriaEmpreendimento();
@@ -907,8 +1001,6 @@ function iniciarFormEmpreendimento() {
     clearTimeout(timerMapa);
     timerMapa = setTimeout(atualizarPreviaMapaEmpreendimento, 600);
   }));
-  // A prévia só carrega quando a aba de empreendimentos é aberta
-  document.querySelector('[data-admin-secao="secao-empreendimentos"]')?.addEventListener('click', atualizarPreviaMapaEmpreendimento);
 
   document.getElementById('emp-imagens-arquivo').addEventListener('change', async (e) => {
     const arquivos = [...e.target.files];
@@ -929,8 +1021,11 @@ function iniciarFormEmpreendimento() {
     e.target.value = '';
   });
 
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', (e) => {
     e.preventDefault();
+    comBotaoOcupado(form, salvarEmpreendimento);
+  });
+  async function salvarEmpreendimento() {
     const idCampo = document.getElementById('emp-id').value;
     const diferenciais = document.getElementById('emp-diferenciais').value
       .split('\n').map((s) => s.trim()).filter(Boolean);
@@ -957,11 +1052,12 @@ function iniciarFormEmpreendimento() {
       renderAdminEmpreendimentos();
       renderAdminDashboard();
       popularSelectEmpreendimentos();
+      avisar(idCampo ? 'Empreendimento atualizado!' : 'Empreendimento cadastrado!');
     } catch (err) {
       if (err.sessaoExpirada) return tratarSessaoExpirada();
-      alert(err.message);
+      avisar(err.message, 'erro');
     }
-  });
+  }
 
   document.getElementById('emp-cancelar')?.addEventListener('click', limparFormEmpreendimento);
 }
@@ -980,6 +1076,136 @@ async function popularSelectEmpreendimentos() {
   select.innerHTML = '<option value="">Nenhum (imóvel avulso)</option>'
     + lista.map((emp) => `<option value="${escHTML(emp.id)}">${escHTML(emp.nome)}</option>`).join('');
   select.value = valorAtual;
+}
+
+// ---- Seção: Simulador (regras usadas na página simulador.html) ----
+const SIMULADOR_SUGERIDO = {
+  sistema: 'SAC',
+  comprometimento_renda: 30,
+  prazo_max_anos: 35,
+  idade_max_fim: 80.5,
+  seguros_mensal_pct: 0.03,
+  taxa_adm_mensal: 25,
+  custos_cartorio_pct: 4,
+  faixas: [
+    { nome: 'Minha Casa Minha Vida - Faixa 1', renda_max: 2850, valor_max: 210000, taxa: 4.25, cota_max: 80, subsidio: 30000 },
+    { nome: 'Minha Casa Minha Vida - Faixa 2', renda_max: 4700, valor_max: 210000, taxa: 6.0, cota_max: 80, subsidio: 15000 },
+    { nome: 'Minha Casa Minha Vida - Faixa 3', renda_max: 8600, valor_max: 350000, taxa: 8.16, cota_max: 80, subsidio: 0 },
+    { nome: 'Minha Casa Minha Vida - Faixa 4', renda_max: 12000, valor_max: 500000, taxa: 10.5, cota_max: 80, subsidio: 0 },
+  ],
+  fora_programa: { nome: 'Financiamento bancário (SBPE)', taxa: 11.5, cota_max: 70 },
+  aviso: 'Estimativa com base nas regras atuais dos programas habitacionais. O valor final, a taxa e o desconto dependem da análise de crédito do banco.',
+};
+
+const _CAMPOS_FAIXA = [
+  ['nome', 'text', ''], ['renda_max', 'number', '1'], ['valor_max', 'number', '1000'],
+  ['taxa', 'number', '0.01'], ['cota_max', 'number', '1'], ['subsidio', 'number', '100'],
+];
+
+function _linhaFaixaHTML(f) {
+  const celulas = _CAMPOS_FAIXA.map(([campo, tipo, passo]) => {
+    const valor = f[campo] == null ? '' : f[campo];
+    const extra = tipo === 'number' ? ` type="number" min="0" step="${passo}" inputmode="decimal"` : ' type="text" maxlength="80"';
+    return `<td><input data-faixa="${campo}"${extra} value="${escHTML(valor)}" required aria-label="${campo}"></td>`;
+  }).join('');
+  return `<tr>${celulas}<td><button type="button" class="btn btn-sm btn-outline-navy" data-remover-faixa aria-label="Remover faixa">Remover</button></td></tr>`;
+}
+
+function preencherFormSimulador(s) {
+  const tbody = document.getElementById('sim-faixas-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = (s.faixas || []).map(_linhaFaixaHTML).join('');
+  const val = (id, v) => { document.getElementById(id).value = v == null ? '' : v; };
+  val('sim-fora-nome', s.fora_programa?.nome);
+  val('sim-fora-taxa', s.fora_programa?.taxa);
+  val('sim-fora-cota', s.fora_programa?.cota_max);
+  val('sim-sistema-padrao', s.sistema === 'PRICE' ? 'PRICE' : 'SAC');
+  val('sim-comprometimento', s.comprometimento_renda);
+  val('sim-prazo-max', s.prazo_max_anos);
+  val('sim-idade-max', s.idade_max_fim);
+  val('sim-seguros', s.seguros_mensal_pct);
+  val('sim-adm', s.taxa_adm_mensal);
+  val('sim-cartorio', s.custos_cartorio_pct);
+  val('sim-aviso-texto', s.aviso);
+}
+
+function lerFormSimulador() {
+  const num = (id) => Number(document.getElementById(id).value);
+  const faixas = [...document.querySelectorAll('#sim-faixas-tbody tr')].map((tr) => {
+    const f = {};
+    _CAMPOS_FAIXA.forEach(([campo, tipo]) => {
+      const v = tr.querySelector(`[data-faixa="${campo}"]`).value.trim();
+      f[campo] = tipo === 'number' ? Number(v) : v;
+    });
+    return f;
+  });
+  return {
+    sistema: document.getElementById('sim-sistema-padrao').value,
+    comprometimento_renda: num('sim-comprometimento'),
+    prazo_max_anos: num('sim-prazo-max'),
+    idade_max_fim: num('sim-idade-max'),
+    seguros_mensal_pct: num('sim-seguros'),
+    taxa_adm_mensal: num('sim-adm'),
+    custos_cartorio_pct: num('sim-cartorio'),
+    faixas,
+    fora_programa: {
+      nome: document.getElementById('sim-fora-nome').value.trim(),
+      taxa: num('sim-fora-taxa'),
+      cota_max: num('sim-fora-cota'),
+    },
+    aviso: document.getElementById('sim-aviso-texto').value.trim(),
+  };
+}
+
+function iniciarFormSimulador() {
+  const form = document.getElementById('form-simulador-regras');
+  if (!form) return;
+  const tbody = document.getElementById('sim-faixas-tbody');
+  const status = document.getElementById('sim-regras-status');
+
+  document.getElementById('sim-faixa-adicionar').addEventListener('click', () => {
+    if (tbody.children.length >= 8) {
+      avisar('O simulador aceita no máximo 8 faixas.', 'erro');
+      return;
+    }
+    tbody.insertAdjacentHTML('beforeend', _linhaFaixaHTML({ nome: '', renda_max: '', valor_max: '', taxa: '', cota_max: 80, subsidio: 0 }));
+    tbody.lastElementChild.querySelector('input').focus();
+  });
+  tbody.addEventListener('click', (e) => {
+    const botao = e.target.closest('[data-remover-faixa]');
+    if (botao) botao.closest('tr').remove();
+  });
+  document.getElementById('sim-regras-padrao').addEventListener('click', () => {
+    if (!confirm('Trocar todos os campos pelos valores sugeridos? (Só vale depois de clicar em "Salvar regras do simulador".)')) return;
+    preencherFormSimulador(SIMULADOR_SUGERIDO);
+    status.textContent = 'Valores sugeridos colocados. Confira e clique em "Salvar regras do simulador".';
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    status.textContent = '';
+    const invalido = [...form.querySelectorAll('input, select, textarea')].find((el) => !el.checkValidity());
+    if (invalido) {
+      invalido.reportValidity();
+      return;
+    }
+    const dados = lerFormSimulador();
+    const rendas = dados.faixas.map((f) => f.renda_max);
+    if (new Set(rendas).size !== rendas.length) {
+      avisar('Duas faixas estão com a mesma "Renda até". Cada faixa precisa de um limite de renda diferente.', 'erro');
+      return;
+    }
+    await comBotaoOcupado(form, async () => {
+      try {
+        const cfg = await apiAuth('/api/configuracoes', 'PUT', { simulador: dados });
+        preencherFormSimulador(cfg.simulador);
+        avisar('Regras do simulador salvas! Já valem no site.');
+      } catch (err) {
+        if (err.sessaoExpirada) return tratarSessaoExpirada();
+        avisar(err.message, 'erro');
+      }
+    });
+  });
 }
 
 // ---- Dashboard ----
@@ -1058,7 +1284,7 @@ async function renderAdminLeads() {
       <td>${_escaparHTML(l.origem)}</td>
       <td>
         ${l.telefone ? `<a class="btn btn-sm btn-outline-navy" href="${_linkWhatsAppParaLead(l.telefone, l.nome)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}
-        <button class="btn btn-sm btn-primary" data-excluir-lead="${l.id}">Excluir</button>
+        <button class="btn btn-sm btn-primary" data-excluir-lead="${_escaparHTML(l.id)}">Excluir</button>
       </td>
     </tr>`).join('');
 
@@ -1070,48 +1296,60 @@ async function renderAdminLeads() {
         await apiAuth(`/api/leads/${id}`, 'DELETE');
         renderAdminLeads();
         renderAdminDashboard();
+        avisar('Lead excluído.');
       } catch (err) {
         if (err.sessaoExpirada) return tratarSessaoExpirada();
-        alert(err.message);
+        avisar(err.message, 'erro');
       }
     });
   });
 }
 
 // ---- Navegação entre seções do painel (com transição) ----
+// A seção aberta fica guardada numa variável (e no endereço, #secao-...), em vez
+// de ser descoberta pelo estilo da página: antes, alguns itens do menu não abriam.
+let _secaoAtual = 'secao-dashboard';
+
+function abrirSecaoAdmin(alvo, animar = true) {
+  const proxima = document.getElementById(alvo);
+  if (!proxima || !proxima.classList.contains('admin-section') || alvo === _secaoAtual) return;
+  const atual = document.getElementById(_secaoAtual);
+  _secaoAtual = alvo;
+  document.querySelectorAll('[data-admin-secao]').forEach((l) => l.classList.toggle('active', l.getAttribute('data-admin-secao') === alvo));
+  history.replaceState(null, '', `#${alvo}`);
+  // A prévia do mapa e o editor de páginas só carregam quando a aba é aberta
+  if (alvo === 'secao-empreendimentos') atualizarPreviaMapaEmpreendimento();
+  if (alvo === 'secao-paginas') document.dispatchEvent(new CustomEvent('admin:abriu-paginas'));
+
+  const trocar = () => {
+    document.querySelectorAll('.admin-section').forEach((s) => {
+      s.style.display = 'none';
+      s.classList.remove('admin-section--enter', 'admin-section--leave');
+    });
+    proxima.style.display = 'block';
+    void proxima.offsetWidth; // força reflow para a animação reiniciar
+    proxima.classList.add('admin-section--enter');
+    document.querySelector('.admin-main')?.scrollTo?.(0, 0);
+    window.scrollTo(0, 0);
+  };
+  if (atual && animar) {
+    atual.classList.add('admin-section--leave');
+    setTimeout(trocar, 150);
+  } else {
+    trocar();
+  }
+}
+
 function iniciarNavegacaoAdmin() {
-  document.querySelectorAll('[data-admin-secao]').forEach((link) => {
+  document.querySelectorAll('[data-admin-secao], [data-ir-secao]').forEach((link) => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      const alvo = link.getAttribute('data-admin-secao');
-      const atual = document.querySelector('.admin-section[style*="display: block"], .admin-section:not([style*="display: none"])');
-      const proxima = document.getElementById(alvo);
-      if (proxima === atual) return;
-
-      document.querySelectorAll('[data-admin-secao]').forEach((l) => l.classList.remove('active'));
-      link.classList.add('active');
-
-      const trocar = () => {
-        // Remove também a classe de saída: antes ela ficava na seção e, ao
-        // voltar para ela depois, a seção abria invisível (opacity 0).
-        document.querySelectorAll('.admin-section').forEach((s) => {
-          s.style.display = 'none';
-          s.classList.remove('admin-section--enter', 'admin-section--leave');
-        });
-        proxima.style.display = 'block';
-        // força reflow para a animação reiniciar mesmo se a mesma classe já foi usada antes
-        void proxima.offsetWidth;
-        proxima.classList.add('admin-section--enter');
-      };
-
-      if (atual) {
-        atual.classList.add('admin-section--leave');
-        setTimeout(trocar, 150);
-      } else {
-        trocar();
-      }
+      abrirSecaoAdmin(link.getAttribute('data-admin-secao') || link.getAttribute('data-ir-secao'));
     });
   });
+  // Recarregou a página? Volta para a mesma aba
+  const doEndereco = location.hash.slice(1);
+  if (doEndereco && doEndereco !== _secaoAtual) abrirSecaoAdmin(doEndereco, false);
 }
 
 // Evita registrar os listeners dos formulários mais de uma vez — pode ser
@@ -1133,14 +1371,15 @@ function iniciarPainelAdmin() {
   if (_painelAdminIniciado) return;
   _painelAdminIniciado = true;
 
-  iniciarNavegacaoAdmin();
   iniciarFormEmpreendimento();
   iniciarFormImovel();
   iniciarFormDepoimento();
   iniciarFormBlog();
   iniciarFormConfig();
   iniciarFormAcesso();
+  iniciarFormSimulador();
   iniciarEditorPaginas();
+  iniciarNavegacaoAdmin(); // por último: pode abrir direto a aba que estava no endereço
 }
 
 document.addEventListener('DOMContentLoaded', () => {

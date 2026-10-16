@@ -49,7 +49,7 @@
 <section class="section secao-clara">
 <div class="container">
 <div class="grid grid-2" style="align-items:flex-start;">
-<form class="form-card" id="form-simulador">
+<form class="form-card" id="form-simulador" novalidate>
 <h3 class="mt-0" data-cms="simulador:3">Preencha os dados</h3>
 <div class="field campo-slider" style="margin-bottom:22px;">
 <label data-cms="simulador:4" for="sim-valor-slider">Valor do imóvel</label>
@@ -58,33 +58,70 @@
 <div class="slider-limites"><span data-cms="simulador:6">R$ 50 mil</span><span data-cms="simulador:7">R$ 1,5 milhão</span></div>
 <input aria-label="Valor exato do imóvel em reais" class="slider-exato" id="sim-valor" inputmode="numeric" min="10000" required step="any" type="number" value="250000">
 </div>
+<div class="field" style="margin-bottom:16px;">
+<label data-cms="simulador:22" for="sim-renda">Renda bruta mensal da família (R$)</label>
+<input id="sim-renda" inputmode="numeric" min="0" placeholder="Ex.: 4500" required step="any" type="number">
+<p class="form-note" data-cms="simulador:23">Some a renda de todos que vão comprar juntos, antes dos descontos. É ela que define a faixa do Minha Casa Minha Vida e o valor máximo da parcela.</p>
+</div>
 <div class="form-row">
 <div class="field">
-<label data-cms="simulador:8" for="sim-entrada">Entrada (%)</label>
-<input id="sim-entrada" max="90" min="0" required step="any" type="number" value="20">
+<label data-cms="simulador:24" for="sim-entrada-valor">Entrada em dinheiro (R$)</label>
+<input id="sim-entrada-valor" inputmode="numeric" min="0" placeholder="0" step="any" type="number" value="25000">
+</div>
+<div class="field">
+<label data-cms="simulador:25" for="sim-fgts">FGTS que vai usar (R$)</label>
+<input id="sim-fgts" inputmode="numeric" min="0" placeholder="0" step="any" type="number" value="0">
+</div>
+</div>
+<div class="form-row">
+<div class="field">
+<label data-cms="simulador:26" for="sim-idade">Idade do comprador mais velho</label>
+<input id="sim-idade" inputmode="numeric" max="80" min="18" placeholder="Ex.: 32" step="1" type="number">
 </div>
 <div class="field">
 <label data-cms="simulador:9" for="sim-prazo">Prazo (anos)</label>
-<input id="sim-prazo" max="35" min="1" required type="number" value="30">
+<input id="sim-prazo" max="35" min="1" required step="1" type="number" value="35">
 </div>
 </div>
-<div class="field" style="margin-bottom:20px;">
-<label data-cms="simulador:10" for="sim-taxa">Taxa de juros anual estimada (%)</label>
-<input id="sim-taxa" max="30" min="0" required step="0.1" type="number" value="9.5">
+<div class="form-row">
+<div class="field">
+<label data-cms="simulador:27" for="sim-sistema">Tipo de parcela</label>
+<select id="sim-sistema">
+<option value="SAC">SAC: começa maior e vai diminuindo</option>
+<option value="PRICE">Price: parcela igual do início ao fim</option>
+</select>
 </div>
+<div class="field">
+<label data-cms="simulador:28" for="sim-taxa">Juros ao ano (%)</label>
+<input id="sim-taxa" max="40" min="0" placeholder="Automático" step="0.01" type="number">
+</div>
+</div>
+<p class="form-note" data-cms="simulador:29" style="margin:-6px 0 18px;">Deixe os juros em branco para usar a taxa da sua faixa de renda.</p>
+<p class="sim-erro" id="sim-erro" role="alert" hidden></p>
 <button class="btn btn-primary btn-block" data-cms="simulador:11" type="submit">Calcular estimativa</button>
-<p class="form-note" data-cms="simulador:12">Este cálculo é uma estimativa educativa (Tabela Price). As condições reais dependem da análise do banco ou agente financeiro.</p>
+<p class="form-note" id="sim-aviso-regras"></p>
 </form>
 <div>
-<div class="form-card" id="sim-resultado" style="display:none;">
+<div class="form-card" id="sim-resultado" style="display:none;" aria-live="polite">
 <h3 class="mt-0" data-cms="simulador:13">Resultado estimado</h3>
-<p style="display:flex;justify-content:space-between;"><span data-cms="simulador:14">Valor de entrada</span><strong id="res-entrada"></strong></p>
-<p style="display:flex;justify-content:space-between;"><span data-cms="simulador:15">Valor financiado</span><strong id="res-financiado"></strong></p>
+<p class="sim-modalidade" id="res-modalidade"></p>
+<div class="sim-linhas">
+<p><span data-cms="simulador:30">Valor do imóvel</span><strong id="res-valor"></strong></p>
+<p><span data-cms="simulador:14">Entrada + FGTS</span><strong id="res-entrada"></strong></p>
+<p id="res-subsidio-linha" hidden><span data-cms="simulador:31">Desconto do programa (estimado)</span><strong id="res-subsidio"></strong></p>
+<p><span data-cms="simulador:15">Valor financiado</span><strong id="res-financiado"></strong></p>
+</div>
 <div class="divider"></div>
-<p style="display:flex;justify-content:space-between;font-size:1.2rem;"><span data-cms="simulador:16">Parcela mensal estimada</span><strong id="res-parcela" style="color:var(--red);"></strong></p>
-<p style="display:flex;justify-content:space-between;color:var(--gray-500);font-size:.85rem;"><span data-cms="simulador:17">Total pago ao final do prazo</span><span id="res-total"></span></p>
+<p class="sim-parcela"><span id="res-parcela-rotulo">Primeira parcela</span><strong id="res-parcela"></strong></p>
+<p class="sim-detalhe" id="res-ultima-linha"><span>Última parcela</span><span id="res-ultima"></span></p>
+<p class="sim-detalhe"><span data-cms="simulador:32">Renda mínima para essa parcela</span><span id="res-renda-min"></span></p>
+<p class="sim-detalhe"><span data-cms="simulador:17">Total pago ao final do prazo</span><span id="res-total"></span></p>
+<p class="sim-detalhe"><span data-cms="simulador:33">ITBI e cartório (pagos à parte)</span><span id="res-cartorio"></span></p>
+<p class="sim-detalhe" id="res-prazo-linha"><span>Prazo</span><span id="res-prazo"></span></p>
+<div class="sim-alertas" id="res-alertas"></div>
 <div class="divider"></div>
-<a class="btn btn-whatsapp btn-block" data-wa href="#"><svg class="icon" fill="currentColor" viewbox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M43.75 18.35 C28.02 19.25 19.76 21.87 14.05 27.78 C10.58 31.38 8.64 35.95 8.42 41.08 C8.00 50.82 13.74 59.10 23.56 62.95 C24.18 63.19 24.68 63.44 24.68 63.53 C24.68 63.61 23.54 67.08 22.15 71.25 C20.76 75.42 19.62 78.98 19.62 79.18 C19.64 79.93 20.34 80.62 21.08 80.62 C21.69 80.62 19.88 81.99 39.20 67.00 L40.06 66.34 L42.01 66.50 C44.60 66.71 53.59 66.71 56.07 66.50 C70.70 65.25 77.57 62.87 83.36 57.07 C92.00 48.42 91.43 33.84 82.16 26.11 C77.85 22.52 72.30 20.34 64.66 19.24 C58.88 18.39 49.77 18.01 43.75 18.35 Z" fill-rule="evenodd"></path></svg> <span data-cms="simulador:18">Quero essa condição — falar no WhatsApp</span></a>
+<a class="btn btn-whatsapp btn-block" href="#" id="sim-whatsapp" rel="noopener" target="_blank"><svg class="icon" fill="currentColor" viewbox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M43.75 18.35 C28.02 19.25 19.76 21.87 14.05 27.78 C10.58 31.38 8.64 35.95 8.42 41.08 C8.00 50.82 13.74 59.10 23.56 62.95 C24.18 63.19 24.68 63.44 24.68 63.53 C24.68 63.61 23.54 67.08 22.15 71.25 C20.76 75.42 19.62 78.98 19.62 79.18 C19.64 79.93 20.34 80.62 21.08 80.62 C21.69 80.62 19.88 81.99 39.20 67.00 L40.06 66.34 L42.01 66.50 C44.60 66.71 53.59 66.71 56.07 66.50 C70.70 65.25 77.57 62.87 83.36 57.07 C92.00 48.42 91.43 33.84 82.16 26.11 C77.85 22.52 72.30 20.34 64.66 19.24 C58.88 18.39 49.77 18.01 43.75 18.35 Z" fill-rule="evenodd"></path></svg> <span data-cms="simulador:18">Quero essa condição — falar no WhatsApp</span></a>
+<p class="form-note" id="res-aviso" style="margin-top:12px;"></p>
 </div>
 <div class="hero-card" style="background:var(--off-white);border:1px solid var(--gray-100);margin-top:20px;">
 <h3 class="mt-0" data-cms="simulador:19">Prefere falar direto com um especialista?</h3>

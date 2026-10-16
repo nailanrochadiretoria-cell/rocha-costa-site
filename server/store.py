@@ -462,6 +462,28 @@ BLOG_PATH = os.path.join(DATA_DIR, 'blog.json')
 CONTEUDO_PATH = os.path.join(DATA_DIR, 'conteudo.json')
 CONFIG_PATH = os.path.join(DATA_DIR, 'configuracoes.json')
 
+# Regras do simulador de financiamento (editáveis no admin, aba "Simulador").
+# Valores de partida aproximados do Minha Casa Minha Vida e do SBPE: quem
+# administra o site deve conferir com o correspondente Caixa e ajustar.
+SIMULADOR_PADRAO = {
+    'sistema': 'SAC',                 # 'SAC' (parcela começa maior e diminui) ou 'PRICE' (parcela fixa)
+    'comprometimento_renda': 30,      # parcela máxima, em % da renda bruta familiar
+    'prazo_max_anos': 35,
+    'idade_max_fim': 80.5,            # idade do comprador mais velho + prazo não pode passar disto
+    'seguros_mensal_pct': 0.03,       # seguros obrigatórios (MIP + DFI), % ao mês sobre o saldo devedor
+    'taxa_adm_mensal': 25,            # taxa de administração do contrato, R$ por mês
+    'custos_cartorio_pct': 4,         # ITBI + escritura/registro, % do valor do imóvel (pagos à parte)
+    'faixas': [
+        {'nome': 'Minha Casa Minha Vida - Faixa 1', 'renda_max': 2850, 'valor_max': 210000, 'taxa': 4.25, 'cota_max': 80, 'subsidio': 30000},
+        {'nome': 'Minha Casa Minha Vida - Faixa 2', 'renda_max': 4700, 'valor_max': 210000, 'taxa': 6.0, 'cota_max': 80, 'subsidio': 15000},
+        {'nome': 'Minha Casa Minha Vida - Faixa 3', 'renda_max': 8600, 'valor_max': 350000, 'taxa': 8.16, 'cota_max': 80, 'subsidio': 0},
+        {'nome': 'Minha Casa Minha Vida - Faixa 4', 'renda_max': 12000, 'valor_max': 500000, 'taxa': 10.5, 'cota_max': 80, 'subsidio': 0},
+    ],
+    'fora_programa': {'nome': 'Financiamento bancário (SBPE)', 'taxa': 11.5, 'cota_max': 70},
+    'aviso': 'Estimativa com base nas regras atuais dos programas habitacionais. O valor final, a taxa e o desconto '
+             'dependem da análise de crédito do banco.',
+}
+
 CONFIG_PADRAO = {
     'whatsapp_numero': '5587999143998',
     'whatsapp_mensagem': 'Quero mais informações sobre o imóvel escolhido.',
@@ -469,6 +491,7 @@ CONFIG_PADRAO = {
     'facebook_url': '',
     'cor_principal': '#001F3E',
     'cor_destaque': '#E3052D',
+    'simulador': SIMULADOR_PADRAO,
 }
 
 
