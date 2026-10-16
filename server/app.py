@@ -292,10 +292,19 @@ CONFIAR_NO_PROXY = os.environ.get('CONFIAR_NO_PROXY', '') == '1' or os.environ.g
 
 def _ip_da_requisicao():
     if CONFIAR_NO_PROXY:
-        # o proxy acrescenta o IP real no FIM; os itens anteriores vêm do cliente
-        encaminhado = request.headers.get('X-Forwarded-For', '')
-        if encaminhado:
-            return encaminhado.split(',')[-1].strip() or 'desconhecido'
+        # No Render há a Cloudflare na frente: ela grava o IP de quem acessou em
+        # CF-Connecting-IP (o visitante não consegue falsificar). O último item do
+        # X-Forwarded-For é o IP do próprio proxy do Render, igual para todo mundo:
+        # usá-lo fazia o bloqueio de 5 tentativas valer para TODOS os visitantes.
+        for cabecalho in ('CF-Connecting-IP', 'True-Client-IP'):
+            valor = request.headers.get(cabecalho, '').strip()
+            if valor:
+                return valor[:64]
+        itens = [i.strip() for i in request.headers.get('X-Forwarded-For', '').split(',') if i.strip()]
+        if len(itens) >= 2:
+            return itens[-2][:64]  # o que vem logo antes do proxy do Render
+        if itens:
+            return itens[0][:64]
     return request.remote_addr or 'desconhecido'
 
 
