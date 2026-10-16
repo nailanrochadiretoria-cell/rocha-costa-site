@@ -1168,15 +1168,46 @@ def put_config():
 TAGS_TEXTO_PERMITIDAS = {'strong', 'b', 'em', 'i', 'br', 'u', 'small'}
 CHAVE_CMS = re.compile(r'^[a-z0-9-]+:[a-z]*\d+$')
 
+# Fontes que o editor deixa escolher (catálogo do Google Fonts em js/fontes-google.json:
+# [nome, categoria, tem negrito]). Só nomes desta lista entram no HTML salvo.
+_FONTE_GENERICA = {'s': 'sans-serif', 'r': 'serif', 'd': 'sans-serif', 'h': 'cursive', 'm': 'monospace'}
+
+
+def _carregar_fontes():
+    try:
+        with open(os.path.join(SITE_DIR, 'js', 'fontes-google.json'), encoding='utf-8') as fh:
+            return {nome: (categoria, bool(negrito)) for nome, categoria, negrito in json.load(fh)}
+    except (OSError, ValueError):
+        print('AVISO: js/fontes-google.json não encontrado — troca de fonte desligada.')
+        return {}
+
+
+FONTES = _carregar_fontes()
+
+
+def _estilo_da_fonte(nome):
+    return f"font-family:'{nome}', {_FONTE_GENERICA.get(FONTES[nome][0], 'sans-serif')}"
+
+
+def _link_das_fontes(nomes):
+    """Um único <link> do Google Fonts com todas as fontes usadas na página."""
+    familias = '&'.join('family=' + nome.replace(' ', '+') + (':wght@400;700' if FONTES[nome][1] else '')
+                        for nome in nomes)
+    return f'https://fonts.googleapis.com/css2?{familias}&display=swap'
+
 
 def _limpar_html_texto(html):
-    """Texto editado no admin: mantém só negrito/itálico/quebra de linha, sem atributos."""
-    soup = BeautifulSoup(str(html)[:5000], 'html.parser')
+    """Texto editado no admin: mantém só negrito/itálico/quebra de linha (sem atributos)
+    e trechos com fonte escolhida no editor (<span data-fonte>, só fontes do catálogo)."""
+    soup = BeautifulSoup(str(html)[:8000], 'html.parser')
     for tag in soup.find_all(True):
         if tag.name in ('script', 'style'):
             tag.decompose()
         elif tag.name in TAGS_TEXTO_PERMITIDAS:
             tag.attrs = {}
+        elif tag.name == 'span' and tag.get('data-fonte') in FONTES:
+            nome = tag['data-fonte']
+            tag.attrs = {'data-fonte': nome, 'style': _estilo_da_fonte(nome)}  # o estilo é refeito aqui, nunca copiado
         else:
             tag.unwrap()
     return soup.decode(formatter=FORMATO_HTML).strip()
@@ -1253,6 +1284,7 @@ def _renderizar_pagina(nome, editar=False):
         novo = conteudo.get('links', {}).get(a['data-cms-link'])
         if novo:
             a['href'] = novo
+    fontes_usadas = sorted({el['data-fonte'] for el in soup.find_all(attrs={'data-fonte': True}) if el['data-fonte'] in FONTES})
     # Redes sociais configuradas no admin (ícones do rodapé)
     for rede, campo in (('Instagram', 'instagram_url'), ('Facebook', 'facebook_url')):
         for a in soup.find_all('a', attrs={'aria-label': rede}):
@@ -1269,6 +1301,8 @@ def _renderizar_pagina(nome, editar=False):
         estilo.string = (f':root{{--navy:{principal};--navy-light:{_escurecer(principal, 1.6)};'
                          f'--navy-dark:{_escurecer(principal, .62)};--red:{destaque};--red-dark:{_escurecer(destaque, .8)};}}')
         soup.head.append(estilo)
+        if fontes_usadas:
+            soup.head.append(soup.new_tag('link', rel='stylesheet', href=_link_das_fontes(fontes_usadas)))
         dados_js = soup.new_tag('script')
         publico = {k: config[k] for k in ('whatsapp_numero', 'whatsapp_mensagem')}
         dados_js.string = (f'window.RC_CONFIG={json_para_script(publico)};'

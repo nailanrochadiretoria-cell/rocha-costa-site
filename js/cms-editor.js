@@ -3,6 +3,7 @@
    ---------------------------------------------------------
    Carregado só quando a página é aberta com ?editar=1 pelo admin.
    - Toque/clique em qualquer texto para editar (Ctrl+B negrito, Ctrl+I itálico)
+   - Pinte um trecho e toque em "Aa Fonte" para trocar a fonte só daquele trecho
    - Toque/clique em uma imagem para trocar (envia a foto)
    - Toque/clique em um link/botão para mudar o endereço
    - "Salvar" grava tudo no servidor; vale para todos os visitantes
@@ -10,8 +11,7 @@
 
 (function () {
   const ROTAS_ADMIN = [
-    ['#hero-track, .hero', 'Os banners do topo são editados na aba "Banners do topo" do admin.'],
-    ['#destaques-grid, #imoveis-grid, #relacionados-grid, #empreendimento-unidades-grid, #imovel-detalhe', 'Os imóveis são editados na aba "Imóveis" do admin.'],
+    ['#destaques-grid, #hero-cartoes, #imoveis-grid, #relacionados-grid, #empreendimento-unidades-grid, #imovel-detalhe', 'Os imóveis são editados na aba "Imóveis" do admin.'],
     ['#portfolio-grid, #empreendimento-detalhe', 'As obras são editadas na aba "Empreendimentos" do admin.'],
     ['#depoimentos-grid, #depoimentos-preview', 'Os depoimentos são editados na aba "Depoimentos" do admin.'],
     ['#blog-grid, #post-container', 'Os artigos são editados na aba "Blog" do admin.'],
@@ -50,6 +50,30 @@
     .cms-link-editor input { width: 100%; margin: 8px 0 10px; font-size: 16px; }
     .cms-link-editor div { display: flex; gap: 8px; justify-content: flex-end; }
     .cms-link-editor button { border: none; border-radius: 999px; padding: 10px 16px; font-weight: 700; cursor: pointer; min-height: 42px; }
+    .cms-barra .cms-fonte { background: #fff; color: #001327; }
+    .cms-fontes-fundo { position: fixed; inset: 0; z-index: 5003; background: rgba(0,10,25,.55); display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .cms-fontes { background: #fff; color: #141a26; width: 100%; max-width: 620px; height: min(680px, calc(100vh - 32px)); border-radius: 18px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.4); display: flex; flex-direction: column; overflow: hidden; font: 500 14px/1.4 system-ui, sans-serif; }
+    .cms-fontes header { padding: 18px 20px 12px; border-bottom: 1px solid #e6e9ef; }
+    .cms-fontes .cms-fontes-topo { display: flex; align-items: center; gap: 12px; }
+    .cms-fontes h2 { margin: 0; flex: 1; font: 700 18px/1.2 system-ui, sans-serif !important; color: #141a26 !important; -webkit-text-fill-color: #141a26; background: none; }
+    .cms-fontes .cms-fontes-fechar { border: none; background: #f0f2f6; width: 38px; height: 38px; border-radius: 50%; font-size: 20px; cursor: pointer; color: #141a26; }
+    .cms-fontes .cms-fontes-trecho { margin: 6px 0 12px; color: #5b6475; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cms-fontes input[type=search] { width: 100%; box-sizing: border-box; font: 500 16px system-ui, sans-serif; padding: 12px 14px 12px 40px; border: 1.5px solid #d6dbe4; border-radius: 12px;
+      color: #141a26; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%235b6475' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 13px center; }
+    .cms-fontes input[type=search]:focus { outline: none; border-color: var(--red); }
+    .cms-fontes .cms-fontes-filtros { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .cms-fontes .cms-fontes-filtros button { flex: none; border: 1.5px solid #d6dbe4; background: #fff; color: #141a26; border-radius: 999px; padding: 6px 12px; font: 600 13px system-ui, sans-serif; cursor: pointer; }
+    .cms-fontes .cms-fontes-filtros button[aria-pressed=true] { background: #141a26; border-color: #141a26; color: #fff; }
+    .cms-fontes .cms-fontes-lista { flex: 1; overflow-y: auto; padding: 6px 10px; overscroll-behavior: contain; }
+    .cms-fontes .cms-fonte-item { display: block; width: 100%; text-align: left; border: none; background: none; padding: 10px 12px; border-radius: 10px; cursor: pointer; color: #141a26; }
+    .cms-fontes .cms-fonte-item:hover, .cms-fontes .cms-fonte-item:focus-visible { background: #f2f4f8; outline: none; }
+    .cms-fontes .cms-fonte-item small { display: block; font: 500 12px system-ui, sans-serif; color: #7a8394; margin-bottom: 2px; }
+    .cms-fontes .cms-fonte-item span { display: block; font-size: 22px; line-height: 1.3; color: #141a26; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cms-fontes .cms-fontes-vazio { padding: 30px 12px; text-align: center; color: #5b6475; }
+    .cms-fontes footer { display: flex; gap: 8px; justify-content: space-between; align-items: center; padding: 12px 20px; border-top: 1px solid #e6e9ef; flex-wrap: wrap; }
+    .cms-fontes footer span { color: #5b6475; font-size: 13px; }
+    .cms-fontes footer button { border: 1.5px solid #d6dbe4; background: #fff; color: #141a26; border-radius: 999px; padding: 9px 16px; font: 700 13px system-ui, sans-serif; cursor: pointer; }
   `;
   document.head.appendChild(css);
 
@@ -58,7 +82,7 @@
   barra.className = 'cms-barra';
   barra.innerHTML = `
     <div class="cms-info"><span class="cms-contagem">Modo edição</span>
-      <small>Toque num texto para editar, numa imagem para trocar ou num botão/link para mudar o endereço.</small></div>
+      <small>Toque num texto para editar, numa imagem para trocar ou num botão/link para mudar o endereço. Para mudar a fonte, pinte o trecho e toque em "Aa Fonte".</small></div>
     <button type="button" class="cms-desfazer" hidden>Desfazer</button>
     <button type="button" class="cms-salvar" disabled>Salvar</button>`;
   const botaoSalvar = barra.querySelector('.cms-salvar');
@@ -95,21 +119,23 @@
   }
 
   // ---------- Textos ----------
+  function registrarTexto(el) {
+    alteracoes.textos[el.dataset.cms] = el.innerHTML;
+    el.classList.add('cms-alterado');
+    // O mesmo texto pode aparecer mais de uma vez (ex.: cabeçalho): mantém tudo igual
+    document.querySelectorAll(`[data-cms="${el.dataset.cms}"]`).forEach((outro) => {
+      if (outro !== el) outro.innerHTML = el.innerHTML;
+    });
+    atualizarBarra();
+  }
+
   function prepararTextos() {
     document.querySelectorAll('[data-cms]').forEach((el) => {
       if (el.closest('.cms-barra')) return;
       el.setAttribute('contenteditable', 'true');
       el.setAttribute('spellcheck', 'true');
       el.addEventListener('focus', () => guardarOriginal(el, 'texto'));
-      el.addEventListener('input', () => {
-        alteracoes.textos[el.dataset.cms] = el.innerHTML;
-        el.classList.add('cms-alterado');
-        // O mesmo texto pode aparecer mais de uma vez (ex.: cabeçalho): mantém tudo igual
-        document.querySelectorAll(`[data-cms="${el.dataset.cms}"]`).forEach((outro) => {
-          if (outro !== el) outro.innerHTML = el.innerHTML;
-        });
-        atualizarBarra();
-      });
+      el.addEventListener('input', () => registrarTexto(el));
       el.addEventListener('keydown', (e) => {
         const multilinha = el.tagName === 'P' || el.tagName === 'LI';
         if (e.key === 'Enter') {
@@ -189,7 +215,7 @@
 
   // ---------- Cliques: nada navega nem envia formulário no modo edição ----------
   document.addEventListener('click', (e) => {
-    if (e.target.closest('.cms-barra, .cms-link-editor')) return;
+    if (e.target.closest('.cms-barra, .cms-link-editor, .cms-fontes-fundo')) return;
     const img = e.target.closest('img[data-cms-img]');
     if (img) {
       e.preventDefault();
@@ -229,6 +255,222 @@
   botaoLink.hidden = true;
   botaoLink.addEventListener('click', () => { if (ultimoLink) editarLink(ultimoLink); });
   barra.insertBefore(botaoLink, botaoDesfazer);
+
+  // ---------- Fontes: trocar a fonte de um trecho do texto ----------
+  // O catálogo (js/fontes-google.json) tem as fontes do Google Fonts: [nome, categoria, tem negrito].
+  const CATEGORIAS = [['', 'Todas'], ['s', 'Sem serifa'], ['r', 'Com serifa'], ['d', 'Decorativas'], ['h', 'Escritas à mão'], ['m', 'Monoespaçadas']];
+  const GENERICA = { s: 'sans-serif', r: 'serif', d: 'sans-serif', h: 'cursive', m: 'monospace' };
+  let catalogo = null;
+  let trechoGuardado = null; // { el, range } — o que estava selecionado antes de abrir a janela
+
+  function semAcento(t) {
+    return t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  }
+
+  function carregarFonte(nome, negrito, texto) {
+    const familia = nome.replace(/ /g, '+') + (!texto && negrito ? ':wght@400;700' : '');
+    const href = `https://fonts.googleapis.com/css2?family=${familia}${texto ? `&text=${encodeURIComponent(texto)}` : ''}&display=swap`;
+    if ([...document.querySelectorAll('link[rel=stylesheet]')].some((l) => l.getAttribute('href') === href)) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  }
+
+  function textoCmsDaSelecao() {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return null;
+    const range = sel.getRangeAt(0);
+    const no = range.commonAncestorContainer;
+    const el = (no.nodeType === 1 ? no : no.parentElement)?.closest('[data-cms]');
+    return el ? { el, range: range.cloneRange() } : null;
+  }
+
+  // No celular, tocar no botão pode apagar a seleção: guarda a última seleção válida
+  document.addEventListener('selectionchange', () => {
+    if (document.querySelector('.cms-fontes-fundo')) return;
+    const atual = textoCmsDaSelecao();
+    if (atual) trechoGuardado = atual;
+  });
+
+  function desembrulharFontes(raiz) {
+    raiz.querySelectorAll('span[data-fonte]').forEach((sp) => sp.replaceWith(...sp.childNodes));
+  }
+
+  function aplicarFonte(nome, negrito, categoria) {
+    const { el, range } = trechoGuardado;
+    guardarOriginal(el, 'texto');
+    const span = document.createElement('span');
+    span.dataset.fonte = nome;
+    span.style.fontFamily = `'${nome}', ${GENERICA[categoria] || 'sans-serif'}`;
+    if (range.collapsed) {
+      // Nada pintado: a fonte vale para o texto inteiro
+      desembrulharFontes(el);
+      span.append(...el.childNodes);
+      el.appendChild(span);
+    } else {
+      const pedaco = range.extractContents();
+      desembrulharFontes(pedaco);
+      span.appendChild(pedaco);
+      range.insertNode(span);
+      // Pedaço vazio que sobrou de uma fonte anterior: limpa
+      el.querySelectorAll('span[data-fonte]').forEach((sp) => { if (!sp.textContent) sp.remove(); });
+    }
+    el.normalize();
+    carregarFonte(nome, negrito);
+    registrarTexto(el);
+    const nova = document.createRange();
+    nova.selectNodeContents(span);
+    trechoGuardado = { el, range: nova };
+    avisar(`Fonte "${nome}" aplicada. Toque em "Salvar" para publicar.`);
+  }
+
+  function tirarFontes() {
+    const { el } = trechoGuardado;
+    if (!el.querySelector('span[data-fonte]')) {
+      avisar('Este texto já está com a fonte original do site.');
+      return;
+    }
+    guardarOriginal(el, 'texto');
+    desembrulharFontes(el);
+    el.normalize();
+    registrarTexto(el);
+    avisar('Este texto voltou para a fonte original do site.');
+  }
+
+  async function abrirFontes() {
+    const atual = textoCmsDaSelecao() || trechoGuardado;
+    if (!atual || !document.contains(atual.el)) {
+      avisar('Primeiro toque no texto (ou pinte só o trecho) que você quer mudar. Depois toque em "Aa Fonte".');
+      return;
+    }
+    trechoGuardado = atual;
+    if (!catalogo) {
+      try {
+        catalogo = await fetch('/js/fontes-google.json').then((r) => r.json());
+      } catch (e) {
+        avisar('Não consegui carregar a lista de fontes. Verifique a internet e tente de novo.');
+        return;
+      }
+    }
+    const trecho = (atual.range.collapsed ? atual.el.textContent : atual.range.toString()).replace(/\s+/g, ' ').trim();
+    const amostra = trecho.slice(0, 40) || 'Rocha Costa Construtora';
+
+    const fundo = document.createElement('div');
+    fundo.className = 'cms-fontes-fundo';
+    fundo.innerHTML = `
+      <div class="cms-fontes" role="dialog" aria-modal="true" aria-labelledby="cms-fontes-titulo">
+        <header>
+          <div class="cms-fontes-topo"><h2 id="cms-fontes-titulo">Escolher fonte</h2>
+            <button type="button" class="cms-fontes-fechar" aria-label="Fechar">×</button></div>
+          <p class="cms-fontes-trecho"></p>
+          <input type="search" placeholder="Pesquisar fonte (ex.: Roboto, Playfair...)" aria-label="Pesquisar fonte" autocomplete="off" spellcheck="false">
+          <div class="cms-fontes-filtros" role="group" aria-label="Tipo de fonte">
+            ${CATEGORIAS.map(([c, nome]) => `<button type="button" data-cat="${c}" aria-pressed="${c === ''}">${nome}</button>`).join('')}
+          </div>
+        </header>
+        <div class="cms-fontes-lista" role="listbox" aria-label="Fontes"></div>
+        <footer><span class="cms-fontes-total"></span><button type="button" class="cms-fontes-original">Voltar à fonte original deste texto</button></footer>
+      </div>`;
+    const reticencias = trecho.length > 40 ? '…' : '';
+    fundo.querySelector('.cms-fontes-trecho').textContent = atual.range.collapsed
+      ? `Vale para o texto inteiro: "${amostra}${reticencias}"`
+      : `Vale para o trecho: "${amostra}${reticencias}"`;
+    const lista = fundo.querySelector('.cms-fontes-lista');
+    const busca = fundo.querySelector('input[type=search]');
+    const total = fundo.querySelector('.cms-fontes-total');
+    let categoria = '';
+
+    // Cada fonte só é baixada quando aparece na tela (e só as letras da amostra)
+    const observador = new IntersectionObserver((entradas) => {
+      entradas.forEach((en) => {
+        if (!en.isIntersecting) return;
+        observador.unobserve(en.target);
+        carregarFonte(en.target.dataset.nome, false, en.target.dataset.nome + amostra);
+      });
+    }, { root: lista, rootMargin: '200px 0px' });
+
+    function desenhar() {
+      const termo = semAcento(busca.value.trim());
+      const achadas = catalogo.filter(([nome, cat]) => (!categoria || cat === categoria) && (!termo || semAcento(nome).includes(termo)));
+      observador.disconnect();
+      lista.innerHTML = '';
+      const frag = document.createDocumentFragment();
+      achadas.forEach(([nome, cat, negrito]) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'cms-fonte-item';
+        b.setAttribute('role', 'option');
+        b.dataset.nome = nome;
+        b.dataset.cat = cat;
+        b.dataset.negrito = negrito ? '1' : '';
+        const rotulo = document.createElement('small');
+        rotulo.textContent = nome;
+        const exemplo = document.createElement('span');
+        exemplo.textContent = amostra;
+        exemplo.style.fontFamily = `'${nome}', ${GENERICA[cat]}`;
+        b.append(rotulo, exemplo);
+        frag.appendChild(b);
+      });
+      lista.appendChild(frag);
+      lista.querySelectorAll('.cms-fonte-item').forEach((b) => observador.observe(b));
+      if (!achadas.length) lista.innerHTML = '<p class="cms-fontes-vazio">Nenhuma fonte com esse nome. Tente outra palavra.</p>';
+      total.textContent = `${achadas.length} fonte(s)`;
+      lista.scrollTop = 0;
+    }
+
+    function fechar() {
+      observador.disconnect();
+      fundo.remove();
+      document.removeEventListener('keydown', teclaEsc, true);
+    }
+    function teclaEsc(e) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        fechar();
+      }
+    }
+
+    let espera;
+    busca.addEventListener('input', () => {
+      clearTimeout(espera);
+      espera = setTimeout(desenhar, 120);
+    });
+    fundo.querySelector('.cms-fontes-filtros').addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-cat]');
+      if (!b) return;
+      categoria = b.dataset.cat;
+      fundo.querySelectorAll('.cms-fontes-filtros button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      desenhar();
+    });
+    lista.addEventListener('click', (e) => {
+      const b = e.target.closest('.cms-fonte-item');
+      if (!b) return;
+      aplicarFonte(b.dataset.nome, !!b.dataset.negrito, b.dataset.cat);
+      fechar();
+    });
+    fundo.querySelector('.cms-fontes-original').addEventListener('click', () => {
+      tirarFontes();
+      fechar();
+    });
+    fundo.querySelector('.cms-fontes-fechar').addEventListener('click', fechar);
+    fundo.addEventListener('click', (e) => { if (e.target === fundo) fechar(); });
+    document.addEventListener('keydown', teclaEsc, true);
+
+    document.body.appendChild(fundo);
+    desenhar();
+    busca.focus();
+  }
+
+  const botaoFonte = document.createElement('button');
+  botaoFonte.type = 'button';
+  botaoFonte.className = 'cms-fonte';
+  botaoFonte.textContent = 'Aa Fonte';
+  botaoFonte.title = 'Trocar a fonte do trecho selecionado';
+  // Não deixa o clique no botão tirar a seleção do texto
+  botaoFonte.addEventListener('mousedown', (e) => e.preventDefault());
+  botaoFonte.addEventListener('click', abrirFontes);
+  barra.insertBefore(botaoFonte, botaoLink);
 
   // ---------- Salvar / desfazer ----------
   botaoSalvar.addEventListener('click', async () => {

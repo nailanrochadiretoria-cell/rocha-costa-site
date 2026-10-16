@@ -42,7 +42,20 @@
 </header>
 <section class="hero">
 <div class="hero-track" id="hero-track">
-<!-- Slides vêm da API (server/data/hero_slides.json), editáveis em admin.html -->
+<!-- Textos editáveis no admin em "Editar páginas" > Início -->
+<div class="hero-slide hero-slide-padrao">
+<div class="container hero-duplo">
+<div class="hero-texto">
+<h1 class="hero-anim"><span data-cms="index:h0">Seu novo lar,</span> <span class="hero-tom2" data-cms="index:h1">construído com qualidade e prazo cumprido.</span></h1>
+<p class="lead hero-anim" data-cms="index:h2">Casas prontas para morar e na planta, com suporte completo no financiamento, inclusive Minha Casa Minha Vida.</p>
+<div class="hero-actions hero-anim">
+<a class="btn btn-primary btn-brilho" data-cms="index:h3" data-cms-link="index:hl0" href="imoveis.html">Ver imóveis</a>
+<a class="btn btn-outline" data-wa href="#"><span data-cms="index:h4">Falar no WhatsApp</span></a>
+</div>
+</div>
+<div class="hero-cartoes" id="hero-cartoes" aria-hidden="true"></div>
+</div>
+</div>
 </div>
 </section>
 <section class="section secao-clara">
@@ -196,9 +209,8 @@
 <script src="js/animacoes.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
-  await renderizarHeroSlides();
-  iniciarHeroCarousel();
   ativarSlideUnicoHero();
+  montarCartoesHero();
 });
 document.addEventListener('DOMContentLoaded', async () => {
   const el = document.getElementById('depoimentos-preview');

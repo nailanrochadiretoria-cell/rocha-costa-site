@@ -72,7 +72,6 @@
     <div class="admin-marca"><img src="img/logo-simbolo.png" alt=""><span>Admin</span></div>
     <a href="#" data-admin-secao="secao-dashboard" class="active">Dashboard</a>
     <a href="#" data-admin-secao="secao-paginas">✏️ Editar páginas</a>
-    <a href="#" data-admin-secao="secao-hero">Banners do topo</a>
     <a href="#" data-admin-secao="secao-empreendimentos">Empreendimentos</a>
     <a href="#" data-admin-secao="secao-imoveis">Imóveis</a>
     <a href="#" data-admin-secao="secao-depoimentos">Depoimentos</a>
@@ -91,87 +90,11 @@
     <section id="secao-dashboard" class="admin-section">
       <h2>Dashboard</h2>
       <div class="grid grid-4">
-        <div class="card"><div class="card-body"><h3 id="dash-hero-total">—</h3><p>Banners do topo</p></div></div>
         <div class="card"><div class="card-body"><h3 id="dash-empreendimentos-total">—</h3><p>Empreendimentos</p></div></div>
         <div class="card"><div class="card-body"><h3 id="dash-imoveis-total">—</h3><p>Imóveis cadastrados</p></div></div>
         <div class="card"><div class="card-body"><h3 id="dash-depoimentos-total">—</h3><p>Depoimentos</p></div></div>
         <div class="card"><div class="card-body"><h3 id="dash-leads-total">—</h3><p>Leads recebidos</p></div></div>
         <div class="card"><div class="card-body"><h3 id="dash-blog-total">—</h3><p>Artigos no blog</p></div></div>
-      </div>
-    </section>
-
-    <section id="secao-hero" class="admin-section" style="display:none;">
-      <div class="admin-toolbar">
-        <h2 class="mt-0">Banners do topo da página inicial</h2>
-      </div>
-      <p class="form-note" style="margin-top:-10px;margin-bottom:16px;">Os banners passam sozinhos, um depois do outro, no topo da página inicial. Tocar no banner leva o visitante para o destino escolhido.</p>
-      <div class="tabela-rolavel"><table class="admin-table" style="margin-bottom:30px;">
-        <thead><tr><th>Computador</th><th>Celular</th><th>Ao clicar, leva para</th><th>Ações</th></tr></thead>
-        <tbody id="admin-hero-tbody"></tbody>
-      </table></div>
-
-      <div class="form-card">
-        <h3 class="mt-0" id="form-hero-titulo-secao">Adicionar banner</h3>
-        <form id="form-hero">
-          <input type="hidden" id="hero-id">
-
-          <div class="form-row banner-imagens">
-            <div class="field banner-campo">
-              <label for="hero-imagem-arquivo">Imagem para computador *</label>
-              <p class="banner-dimensao">Tamanho ideal: <strong>1920 × 730 px</strong> (horizontal)</p>
-              <div class="banner-preview banner-preview--pc"><img id="hero-preview-pc" alt="Prévia da imagem para computador" hidden><span>Prévia</span></div>
-              <input type="file" id="hero-imagem-arquivo" accept="image/png,image/jpeg,image/webp,image/gif">
-              <input type="text" id="hero-imagem-url" placeholder="...ou cole o endereço de uma imagem" style="margin-top:8px;">
-              <p class="form-note" id="hero-upload-status"></p>
-            </div>
-            <div class="field banner-campo">
-              <label for="hero-imagem-mobile-arquivo">Imagem para celular</label>
-              <p class="banner-dimensao">Tamanho ideal: <strong>1080 × 1350 px</strong> (vertical)</p>
-              <div class="banner-preview banner-preview--celular"><img id="hero-preview-celular" alt="Prévia da imagem para celular" hidden><span>Prévia</span></div>
-              <input type="file" id="hero-imagem-mobile-arquivo" accept="image/png,image/jpeg,image/webp,image/gif">
-              <input type="text" id="hero-imagem-mobile-url" placeholder="...ou cole o endereço de uma imagem" style="margin-top:8px;">
-              <p class="form-note" id="hero-upload-mobile-status">Opcional: sem ela, o celular mostra a imagem de computador.</p>
-            </div>
-          </div>
-
-          <div class="banner-destino">
-            <div class="field">
-              <label for="hero-cta-tipo">Ao clicar no banner, levar para</label>
-              <select id="hero-cta-tipo">
-                <option value="imoveis">Catálogo de imóveis</option>
-                <option value="imovel">Um imóvel específico</option>
-                <option value="empreendimento">Um empreendimento específico</option>
-                <option value="portfolio">Portfólio de obras</option>
-                <option value="simulador">Simulador de financiamento</option>
-                <option value="depoimentos">Depoimentos</option>
-                <option value="blog">Blog</option>
-                <option value="sobre">Sobre nós</option>
-                <option value="contato">Contato</option>
-                <option value="whatsapp">WhatsApp</option>
-                <option value="url">Endereço personalizado</option>
-                <option value="nenhum">Nenhum (banner sem link)</option>
-              </select>
-            </div>
-            <div class="field" id="hero-cta-item-wrap" hidden>
-              <label for="hero-cta-item" id="hero-cta-item-label">Qual imóvel?</label>
-              <select id="hero-cta-item"></select>
-            </div>
-            <div class="field" id="hero-cta-valor-wrap" hidden>
-              <label for="hero-cta-valor">Endereço</label>
-              <input id="hero-cta-valor" inputmode="url" placeholder="https://... ou contato.html">
-            </div>
-            <div class="field">
-              <label for="hero-titulo">Nome do banner (opcional)</label>
-              <input id="hero-titulo" placeholder="Ex.: Lançamento Vila Eduardo">
-              <p class="form-note">Usado para identificar o banner e por leitores de tela.</p>
-            </div>
-          </div>
-
-          <div class="hero-actions">
-            <button type="submit" class="btn btn-primary">Salvar banner</button>
-            <button type="button" id="hero-cancelar" class="btn btn-outline-navy">Limpar formulário</button>
-          </div>
-        </form>
       </div>
     </section>
 

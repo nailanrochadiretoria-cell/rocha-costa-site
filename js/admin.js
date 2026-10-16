@@ -982,217 +982,21 @@ async function popularSelectEmpreendimentos() {
   select.value = valorAtual;
 }
 
-// ---- Seção: Banners do topo (slides da home) ----
-// Cada banner = imagem para computador + imagem para celular + destino do clique.
-const HERO_DESTINOS = {
-  imoveis: 'Catálogo de imóveis', portfolio: 'Portfólio de obras', simulador: 'Simulador',
-  depoimentos: 'Depoimentos', contato: 'Contato', blog: 'Blog', sobre: 'Sobre nós', whatsapp: 'WhatsApp',
-  imovel: 'Um imóvel específico', empreendimento: 'Um empreendimento específico', url: 'Endereço personalizado', nenhum: 'Nenhum (sem link)',
-};
-
-async function _nomeDestinoHero(s) {
-  const base = HERO_DESTINOS[s.cta_tipo] || s.cta_tipo || '—';
-  if (s.cta_tipo === 'url') return `${base}: ${s.cta_valor || '—'}`;
-  if (s.cta_tipo === 'imovel' || s.cta_tipo === 'empreendimento') {
-    const lista = await apiGet(`/api/${s.cta_tipo === 'imovel' ? 'imoveis' : 'empreendimentos'}`).catch(() => []);
-    const item = lista.find((x) => String(x.id) === String(s.cta_valor));
-    return `${base}: ${item ? (item.titulo || item.nome) : 'não encontrado'}`;
-  }
-  return base;
-}
-
-async function renderAdminHero() {
-  const tbody = document.getElementById('admin-hero-tbody');
-  if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="4">Carregando...</td></tr>';
-
-  let lista;
-  try {
-    lista = await apiGet('/api/hero-slides');
-  } catch (e) {
-    tbody.innerHTML = '<tr><td colspan="4">Não foi possível carregar os banners.</td></tr>';
-    return;
-  }
-  if (!lista.length) {
-    tbody.innerHTML = '<tr><td colspan="4">Nenhum banner cadastrado — a página inicial mostra um texto padrão no lugar.</td></tr>';
-    return;
-  }
-
-  const destinos = await Promise.all(lista.map(_nomeDestinoHero));
-  tbody.innerHTML = lista.map((s, i) => `
-    <tr>
-      <td>${s.imagem ? `<img class="admin-hero-thumb" src="${urlSegura(s.imagem)}" alt="">` : '<span class="form-note">sem imagem</span>'}</td>
-      <td>${s.imagem_mobile ? `<img class="admin-hero-thumb admin-hero-thumb--celular" src="${urlSegura(s.imagem_mobile)}" alt="">` : '<span class="form-note">usa a do computador</span>'}</td>
-      <td>${escHTML(destinos[i])}</td>
-      <td>
-        <button class="btn btn-sm btn-outline-navy" data-editar-hero="${escHTML(s.id)}">Editar</button>
-        <button class="btn btn-sm btn-primary" data-excluir-hero="${escHTML(s.id)}">Excluir</button>
-      </td>
-    </tr>`).join('');
-
-  tbody.querySelectorAll('[data-excluir-hero]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      if (!confirm('Excluir este banner?')) return;
-      try {
-        await apiAuth(`/api/hero-slides/${btn.getAttribute('data-excluir-hero')}`, 'DELETE');
-        renderAdminHero();
-        renderAdminDashboard();
-      } catch (err) {
-        if (err.sessaoExpirada) return tratarSessaoExpirada();
-        alert(err.message);
-      }
-    });
-  });
-  tbody.querySelectorAll('[data-editar-hero]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const item = lista.find((x) => String(x.id) === btn.getAttribute('data-editar-hero'));
-      if (!item) return;
-      preencherFormHero(item);
-      document.getElementById('form-hero').scrollIntoView({ behavior: 'smooth' });
-    });
-  });
-}
-
-function _previewHero(tipo, url) {
-  const img = document.getElementById(`hero-preview-${tipo}`);
-  if (!img) return;
-  img.hidden = !url;
-  if (url) img.src = url;
-}
-
-// Mostra o campo certo embaixo do "Ao clicar, levar para"
-async function atualizarDestinoHero(valorAtual) {
-  const tipo = document.getElementById('hero-cta-tipo').value;
-  const wrapUrl = document.getElementById('hero-cta-valor-wrap');
-  const wrapItem = document.getElementById('hero-cta-item-wrap');
-  wrapUrl.hidden = tipo !== 'url';
-  wrapItem.hidden = !(tipo === 'imovel' || tipo === 'empreendimento');
-  if (!wrapItem.hidden) {
-    const select = document.getElementById('hero-cta-item');
-    document.getElementById('hero-cta-item-label').textContent = tipo === 'imovel' ? 'Qual imóvel?' : 'Qual empreendimento?';
-    const lista = await apiGet(`/api/${tipo === 'imovel' ? 'imoveis' : 'empreendimentos'}`).catch(() => []);
-    select.innerHTML = lista.map((x) => `<option value="${escHTML(x.id)}">${escHTML(x.titulo || x.nome)}${x.bairro ? ` — ${escHTML(x.bairro)}` : ''}</option>`).join('')
-      || '<option value="">Nenhum cadastrado ainda</option>';
-    if (valorAtual) select.value = String(valorAtual);
-  }
-}
-
-function preencherFormHero(item) {
-  document.getElementById('hero-id').value = item.id;
-  document.getElementById('hero-titulo').value = item.titulo || '';
-  document.getElementById('hero-imagem-url').value = item.imagem || '';
-  document.getElementById('hero-imagem-mobile-url').value = item.imagem_mobile || '';
-  const tipo = HERO_DESTINOS[item.cta_tipo] ? item.cta_tipo : 'imoveis';
-  document.getElementById('hero-cta-tipo').value = tipo;
-  document.getElementById('hero-cta-valor').value = tipo === 'url' ? (item.cta_valor || '') : '';
-  document.getElementById('form-hero-titulo-secao').textContent = 'Editar banner';
-  _previewHero('pc', item.imagem);
-  _previewHero('celular', item.imagem_mobile);
-  atualizarDestinoHero(item.cta_valor);
-}
-
-function limparFormHero() {
-  document.getElementById('form-hero').reset();
-  document.getElementById('hero-id').value = '';
-  document.getElementById('form-hero-titulo-secao').textContent = 'Adicionar banner';
-  document.getElementById('hero-upload-status').textContent = '';
-  document.getElementById('hero-upload-mobile-status').textContent = '';
-  _previewHero('pc', '');
-  _previewHero('celular', '');
-  atualizarDestinoHero();
-}
-
-function iniciarFormHero() {
-  const form = document.getElementById('form-hero');
-  if (!form) return;
-
-  document.getElementById('hero-cta-tipo').addEventListener('change', () => atualizarDestinoHero());
-
-  // Upload das duas imagens (computador e celular)
-  [['hero-imagem-arquivo', 'hero-imagem-url', 'hero-upload-status', 'pc'],
-    ['hero-imagem-mobile-arquivo', 'hero-imagem-mobile-url', 'hero-upload-mobile-status', 'celular']]
-    .forEach(([idArquivo, idUrl, idStatus, tipo]) => {
-      document.getElementById(idUrl).addEventListener('input', (e) => _previewHero(tipo, e.target.value.trim()));
-      document.getElementById(idArquivo).addEventListener('change', async (e) => {
-        const arquivo = e.target.files[0];
-        if (!arquivo) return;
-        const status = document.getElementById(idStatus);
-        status.textContent = 'Enviando imagem...';
-        try {
-          const { url } = await apiUploadImagem(arquivo);
-          document.getElementById(idUrl).value = url;
-          _previewHero(tipo, url);
-          status.textContent = 'Imagem enviada. Clique em "Salvar banner".';
-        } catch (err) {
-          if (err.sessaoExpirada) return tratarSessaoExpirada();
-          status.textContent = `Erro: ${err.message}`;
-        }
-        e.target.value = '';
-      });
-    });
-
-  let salvando = false;
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (salvando) return;
-    const idCampo = document.getElementById('hero-id').value;
-    const imagem = document.getElementById('hero-imagem-url').value.trim();
-    if (!imagem) {
-      alert('Envie a imagem para computador (é obrigatória).');
-      return;
-    }
-    const tipo = document.getElementById('hero-cta-tipo').value;
-    let valor = '';
-    if (tipo === 'url') valor = document.getElementById('hero-cta-valor').value.trim();
-    if (tipo === 'imovel' || tipo === 'empreendimento') valor = document.getElementById('hero-cta-item').value;
-    if ((tipo === 'url' || tipo === 'imovel' || tipo === 'empreendimento') && !valor) {
-      alert('Escolha para onde o banner deve levar.');
-      return;
-    }
-    const dados = {
-      titulo: document.getElementById('hero-titulo').value.trim(),
-      imagem,
-      imagem_mobile: document.getElementById('hero-imagem-mobile-url').value.trim(),
-      cta_tipo: tipo,
-      cta_valor: valor,
-      area_clicavel: null,
-    };
-    salvando = true;
-    try {
-      if (idCampo) await apiAuth(`/api/hero-slides/${idCampo}`, 'PUT', dados);
-      else await apiAuth('/api/hero-slides', 'POST', dados);
-      limparFormHero();
-      renderAdminHero();
-      renderAdminDashboard();
-    } catch (err) {
-      if (err.sessaoExpirada) return tratarSessaoExpirada();
-      alert(err.message);
-    } finally {
-      salvando = false;
-    }
-  });
-
-  document.getElementById('hero-cancelar')?.addEventListener('click', limparFormHero);
-}
-
 // ---- Dashboard ----
 async function renderAdminDashboard() {
   const el = document.getElementById('dash-imoveis-total');
   const el2 = document.getElementById('dash-depoimentos-total');
-  const el3 = document.getElementById('dash-hero-total');
   const el4 = document.getElementById('dash-empreendimentos-total');
   const el5 = document.getElementById('dash-leads-total');
   if (!el || !el2) return;
-  const [imoveis, depoimentos, heroSlides, empreendimentos, leads] = await Promise.all([
+  const [imoveis, depoimentos, empreendimentos, leads] = await Promise.all([
     apiGet('/api/imoveis').catch(() => []),
     apiGet('/api/depoimentos').catch(() => []),
-    apiGet('/api/hero-slides').catch(() => []),
     apiGet('/api/empreendimentos').catch(() => []),
     apiAuth('/api/leads', 'GET').catch(() => []),
   ]);
   el.textContent = imoveis.length;
   el2.textContent = depoimentos.length;
-  if (el3) el3.textContent = heroSlides.length;
   if (el4) el4.textContent = empreendimentos.length;
   if (el5) el5.textContent = leads.length;
   const el6 = document.getElementById('dash-blog-total');
@@ -1318,7 +1122,6 @@ let _painelAdminIniciado = false;
 
 function iniciarPainelAdmin() {
   renderAdminDashboard();
-  renderAdminHero();
   renderAdminEmpreendimentos();
   renderAdminImoveis();
   renderAdminDepoimentos();
@@ -1331,7 +1134,6 @@ function iniciarPainelAdmin() {
   _painelAdminIniciado = true;
 
   iniciarNavegacaoAdmin();
-  iniciarFormHero();
   iniciarFormEmpreendimento();
   iniciarFormImovel();
   iniciarFormDepoimento();
