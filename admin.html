@@ -79,7 +79,7 @@
     <a href="#" data-admin-secao="secao-leads">Leads</a>
     <a href="#" data-admin-secao="secao-config">Configurações</a>
     <a href="#" style="margin-top:20px;border-top:1px solid rgba(255,255,255,.1);padding-top:16px;" id="admin-logout">Sair</a>
-    <a href="index.html" style="color:var(--gray-500);font-size:.82rem;">← Voltar para o site</a>
+    <a href="/" style="color:var(--gray-500);font-size:.82rem;">← Voltar para o site</a>
   </aside>
 
   <main class="admin-main">
@@ -291,17 +291,17 @@ Documentação regularizada"></textarea>
           <label for="editor-pagina">Página</label>
           <select id="editor-pagina">
             <option value="index.html">Início</option>
-            <option value="sobre.html">Sobre</option>
-            <option value="portfolio.html">Portfólio</option>
-            <option value="imoveis.html">Imóveis</option>
-            <option value="simulador.html">Simulador</option>
-            <option value="depoimentos.html">Depoimentos</option>
-            <option value="blog.html">Blog</option>
-            <option value="contato.html">Contato</option>
-            <option value="privacidade.html">Política de privacidade</option>
-            <option value="imovel.html" data-precisa-id="imoveis">Página de um imóvel</option>
-            <option value="empreendimento.html" data-precisa-id="empreendimentos">Página de um empreendimento</option>
-            <option value="blog-post.html" data-precisa-id="blog">Página de um artigo</option>
+            <option value="sobre">Sobre</option>
+            <option value="portfolio">Portfólio</option>
+            <option value="imoveis">Imóveis</option>
+            <option value="simulador">Simulador</option>
+            <option value="depoimentos">Depoimentos</option>
+            <option value="blog">Blog</option>
+            <option value="contato">Contato</option>
+            <option value="privacidade">Política de privacidade</option>
+            <option value="imovel" data-precisa-id="imoveis">Página de um imóvel</option>
+            <option value="empreendimento" data-precisa-id="empreendimentos">Página de um empreendimento</option>
+            <option value="blog-post" data-precisa-id="blog">Página de um artigo</option>
             <option value="404.html">Página não encontrada (404)</option>
           </select>
         </div>
@@ -365,6 +365,17 @@ Documentação regularizada"></textarea>
             <div class="field"><label for="cfg-facebook">Facebook (link)</label><input id="cfg-facebook" type="url" inputmode="url" placeholder="https://facebook.com/..."></div>
           </div>
           <p class="form-note" style="margin-top:-8px;margin-bottom:22px;">Deixe em branco para esconder o ícone no rodapé.</p>
+          <h3>Ícone da aba do navegador</h3>
+          <div class="favicon-linha">
+            <img id="cfg-favicon-previa" src="img/favicon.png" alt="Ícone atual" width="48" height="48">
+            <div class="field" style="flex:1;min-width:0;">
+              <label for="cfg-favicon-arquivo">Enviar imagem quadrada (PNG, ideal 512 × 512 px)</label>
+              <input type="file" id="cfg-favicon-arquivo" accept="image/png,image/webp,image/jpeg,image/gif">
+              <input type="hidden" id="cfg-favicon">
+              <p class="form-note" id="cfg-favicon-status">É a imagem pequena que aparece na aba, ao lado do nome do site.</p>
+            </div>
+            <button type="button" id="cfg-favicon-padrao" class="btn btn-sm btn-outline-navy">Usar o ícone original</button>
+          </div>
           <h3>Cores</h3>
           <div class="form-row">
             <div class="field"><label for="cfg-cor-principal">Cor principal (fundos azuis, títulos)</label><input id="cfg-cor-principal" type="color"></div>

@@ -1,5 +1,5 @@
 /* =========================================================
-   Rocha Costa — Página de detalhe do imóvel (imovel.html?id=)
+   Rocha Costa — Página de detalhe do imóvel (imovel?id=)
    ========================================================= */
 
 async function iniciarDetalheImovel() {
@@ -22,7 +22,7 @@ async function iniciarDetalheImovel() {
       <div class="center" style="padding:60px 0;">
         <h2>Imóvel não encontrado</h2>
         <p>O imóvel que você procura não existe ou foi removido.</p>
-        <a class="btn btn-secondary" href="imoveis.html">Ver todos os imóveis</a>
+        <a class="btn btn-secondary" href="imoveis">Ver todos os imóveis</a>
       </div>`;
     return;
   }
@@ -60,7 +60,7 @@ async function iniciarDetalheImovel() {
 
   container.innerHTML = `
     <div class="breadcrumb" style="margin-bottom:20px;">
-      <a href="index.html">Início</a> / <a href="imoveis.html">Imóveis</a> / ${escHTML(im.titulo)}
+      <a href="/">Início</a> / <a href="imoveis">Imóveis</a> / ${escHTML(im.titulo)}
     </div>
     <div class="grid grid-2" style="align-items:flex-start;">
       <div class="galeria-imovel" data-anim="zoom">
@@ -94,7 +94,7 @@ async function iniciarDetalheImovel() {
         <h3>Sobre o imóvel</h3>
         <p style="white-space:pre-line;">${escHTML(im.descricao || 'Fale com a nossa equipe para receber todos os detalhes deste imóvel.')}</p>
 
-        ${obra ? `<p class="card-obra" style="margin-top:14px;">${ICON_OBRA} Faz parte da obra <a href="empreendimento.html?id=${encodeURIComponent(obra.id)}">${escHTML(obra.nome)}</a></p>` : ''}
+        ${obra ? `<p class="card-obra" style="margin-top:14px;">${ICON_OBRA} Faz parte da obra <a href="empreendimento?id=${encodeURIComponent(obra.id)}">${escHTML(obra.nome)}</a></p>` : ''}
 
         <div class="divider"></div>
         <h3>Onde fica</h3>
@@ -112,7 +112,7 @@ async function iniciarDetalheImovel() {
           <p style="color:var(--gray-700);">Preencha o formulário ou chame direto no WhatsApp que a nossa equipe te retorna com todos os detalhes, condições de pagamento e visita agendada.</p>
           <div class="hero-actions" style="margin-top:16px;">
             <a class="btn btn-whatsapp" href="#" data-wa data-wa-item="${escHTML(im.titulo)}"><svg class="icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path fill-rule="evenodd" d="M43.75 18.35 C28.02 19.25 19.76 21.87 14.05 27.78 C10.58 31.38 8.64 35.95 8.42 41.08 C8.00 50.82 13.74 59.10 23.56 62.95 C24.18 63.19 24.68 63.44 24.68 63.53 C24.68 63.61 23.54 67.08 22.15 71.25 C20.76 75.42 19.62 78.98 19.62 79.18 C19.64 79.93 20.34 80.62 21.08 80.62 C21.69 80.62 19.88 81.99 39.20 67.00 L40.06 66.34 L42.01 66.50 C44.60 66.71 53.59 66.71 56.07 66.50 C70.70 65.25 77.57 62.87 83.36 57.07 C92.00 48.42 91.43 33.84 82.16 26.11 C77.85 22.52 72.30 20.34 64.66 19.24 C58.88 18.39 49.77 18.01 43.75 18.35 Z"/></svg> Chamar no WhatsApp</a>
-            <a class="btn btn-outline-navy" href="contato.html?imovel=${encodeURIComponent(im.titulo)}">Preencher formulário</a>
+            <a class="btn btn-outline-navy" href="contato?imovel=${encodeURIComponent(im.titulo)}">Preencher formulário</a>
           </div>
         </div>
       </div>

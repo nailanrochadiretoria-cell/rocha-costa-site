@@ -45,7 +45,7 @@ const ICON_RULER = '<svg class="icon-sm" viewBox="0 0 16 16" xmlns="http://www.w
 
 function cardImovelHTML(im) {
   return `
-    <a class="card property-card" href="imovel.html?id=${encodeURIComponent(im.id)}" style="text-decoration:none;color:inherit;">
+    <a class="card property-card" href="imovel?id=${encodeURIComponent(im.id)}" style="text-decoration:none;color:inherit;">
       <div class="img-wrap">
         <img src="${urlSegura(im.imagem, IMAGEM_PADRAO_IMOVEL)}" alt="${escHTML(im.titulo)}" loading="lazy" onerror="this.onerror=null;this.src='${IMAGEM_PADRAO_IMOVEL}';this.classList.add('img-fallback')">
         ${im.status ? `<span class="status-badge">${escHTML(im.status)}</span>` : ''}

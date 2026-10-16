@@ -1,5 +1,5 @@
 /* =========================================================
-   Rocha Costa — Página de detalhe do empreendimento (empreendimento.html?id=)
+   Rocha Costa — Página de detalhe do empreendimento (empreendimento?id=)
    ========================================================= */
 
 function _tagStatusEmpreendimento(status) {
@@ -28,7 +28,7 @@ async function iniciarDetalheEmpreendimento() {
       <div class="center" style="padding:60px 0;">
         <h2>Empreendimento não encontrado</h2>
         <p>O empreendimento que você procura não existe ou foi removido.</p>
-        <a class="btn btn-secondary" href="portfolio.html">Ver portfólio de obras</a>
+        <a class="btn btn-secondary" href="portfolio">Ver portfólio de obras</a>
       </div>`;
     return;
   }
@@ -52,7 +52,7 @@ async function iniciarDetalheEmpreendimento() {
 
   container.innerHTML = `
     <div class="breadcrumb" style="margin-bottom:20px;">
-      <a href="index.html">Início</a> / <a href="portfolio.html">Portfólio</a> / ${escHTML(emp.nome)}
+      <a href="/">Início</a> / <a href="portfolio">Portfólio</a> / ${escHTML(emp.nome)}
     </div>
 
     <div class="detalhe-foto detalhe-capa" data-anim="zoom">
@@ -92,7 +92,7 @@ async function iniciarDetalheEmpreendimento() {
         <p style="color:var(--gray-700);">Fale com a gente e receba condições, disponibilidade de unidades e agende uma visita.</p>
         <div class="hero-actions" style="margin-top:16px;">
           <a class="btn btn-whatsapp" href="#" data-wa data-wa-item="${escHTML(emp.nome)}">Chamar no WhatsApp</a>
-          <a class="btn btn-outline-navy" href="contato.html?imovel=${encodeURIComponent(emp.nome)}">Preencher formulário</a>
+          <a class="btn btn-outline-navy" href="contato?imovel=${encodeURIComponent(emp.nome)}">Preencher formulário</a>
         </div>
       </div>
     </div>
@@ -110,7 +110,7 @@ async function iniciarDetalheEmpreendimento() {
     renderGridImoveis(unidades, 'empreendimento-unidades-grid');
   } else {
     document.getElementById('empreendimento-unidades-grid').innerHTML =
-      '<p style="color:var(--gray-500);">Nenhuma unidade vinculada a este empreendimento no momento. <a href="imoveis.html">Veja o catálogo completo</a>.</p>';
+      '<p style="color:var(--gray-500);">Nenhuma unidade vinculada a este empreendimento no momento. <a href="imoveis">Veja o catálogo completo</a>.</p>';
   }
 }
 

@@ -67,13 +67,15 @@ function iniciarMenuMobile() {
 
 // ---- Marca o link ativo do menu conforme a página atual ----
 function marcarLinkAtivo() {
-  let atual = location.pathname.split('/').pop() || 'index.html';
+  // Endereços sem ".html" (rochacosta.com/sobre); "/" é a página inicial
+  const nomeDaPagina = (endereco) => (String(endereco || '').split(/[?#]/)[0].split('/').pop() || 'index').replace(/\.html$/, '');
+  let atual = nomeDaPagina(location.pathname);
   // Páginas de detalhe acendem o item de menu da seção a que pertencem
-  const secaoPai = { 'imovel.html': 'imoveis.html', 'empreendimento.html': 'portfolio.html', 'blog-post.html': 'blog.html' };
+  const secaoPai = { imovel: 'imoveis', empreendimento: 'portfolio', 'blog-post': 'blog' };
   atual = secaoPai[atual] || atual;
   document.querySelectorAll('.nav-links a').forEach((a) => {
     const href = a.getAttribute('href');
-    if (href === atual) {
+    if (nomeDaPagina(href) === atual) {
       a.classList.add('active');
       a.setAttribute('aria-current', 'page');
     }
@@ -308,7 +310,7 @@ function mostrarAvisoDeCookies() {
   aviso.innerHTML = `
     <div class="cookie-aviso-texto">
       <strong>A sua privacidade é muito importante para nós</strong>
-      <p>Nós usamos cookies para o site funcionar bem e, com a sua permissão, para mostrar os mapas das obras e dos imóveis. Ao clicar em "Aceitar todos", você concorda com o uso de todos os cookies, como descrito na nossa <a href="privacidade.html">Política de Privacidade</a>.</p>
+      <p>Nós usamos cookies para o site funcionar bem e, com a sua permissão, para mostrar os mapas das obras e dos imóveis. Ao clicar em "Aceitar todos", você concorda com o uso de todos os cookies, como descrito na nossa <a href="privacidade">Política de Privacidade</a>.</p>
     </div>
     <div class="cookie-aviso-botoes">
       <button type="button" class="cookie-btn cookie-btn--cheio" data-cookies="aceitar">Aceitar todos</button>
@@ -377,7 +379,7 @@ function abrirPreferenciasDeCookies() {
       <div class="cookie-janela-corpo">
         <p>Cookies são pequenos arquivos que o site guarda no seu navegador. Escolha abaixo quais tipos você permite. Os necessários ficam sempre ativos; os demais só funcionam se você ligar.</p>
         ${categoriasHTML}
-        <p class="cookie-registro">${registro} A escolha vale por 6 meses neste navegador. Saiba mais na <a href="privacidade.html">Política de Privacidade</a>.</p>
+        <p class="cookie-registro">${registro} A escolha vale por 6 meses neste navegador. Saiba mais na <a href="privacidade">Política de Privacidade</a>.</p>
       </div>
       <footer>
         <button type="button" class="cookie-btn cookie-btn--contorno" data-acao="recusar">Rejeitar todos</button>

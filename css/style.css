@@ -1898,3 +1898,5 @@ a.dash-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
 .galeria-mini.ativa { border-color: var(--red); opacity: 1; }
 .galeria-mini:hover { opacity: 1; }
 @media (max-width: 640px) { .galeria-seta { width: 38px; height: 38px; font-size: 24px; } .galeria-mini { flex-basis: 68px; height: 52px; } }
+.favicon-linha { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+.favicon-linha img { width: 48px; height: 48px; object-fit: contain; border-radius: 10px; background: #fff; border: 1px solid var(--gray-100); padding: 4px; }

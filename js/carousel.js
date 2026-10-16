@@ -9,7 +9,7 @@
 function _cartaoImovelHero(im, classe) {
   const preco = typeof formatarPrecoImovel === 'function' ? formatarPrecoImovel(im.preco) : '';
   return `
-    <a class="cartao-flutuante ${classe}" href="imovel.html?id=${encodeURIComponent(im.id)}" tabindex="-1">
+    <a class="cartao-flutuante ${classe}" href="imovel?id=${encodeURIComponent(im.id)}" tabindex="-1">
       <span class="cartao-foto"><img src="${urlSegura(im.imagem, 'img/logo-simbolo.png')}" alt="" onerror="this.onerror=null;this.src='img/logo-simbolo.png';this.classList.add('img-fallback')"></span>
       <span class="cartao-info">
         <span class="cartao-marca"><img src="img/logo-simbolo.png" alt="">Rocha Costa</span>

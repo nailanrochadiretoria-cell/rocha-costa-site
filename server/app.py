@@ -40,7 +40,7 @@ from argon2.exceptions import InvalidHashError, VerificationError
 from bs4 import BeautifulSoup
 from bs4.dammit import EntitySubstitution
 from bs4.formatter import HTMLFormatter
-from flask import Flask, abort, jsonify, make_response, request, send_from_directory
+from flask import Flask, abort, jsonify, make_response, redirect, request, send_from_directory
 from google import genai
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 from google.genai import errors as genai_errors, types as genai_types
@@ -1155,7 +1155,7 @@ def _filtrar_config(dados):
         limpos['whatsapp_numero'] = re.sub(r'\D', '', str(dados.get('whatsapp_numero') or ''))[:15]
     if 'whatsapp_mensagem' in dados:
         limpos['whatsapp_mensagem'] = limpar_texto(dados.get('whatsapp_mensagem'), 300)
-    for campo in ('instagram_url', 'facebook_url'):
+    for campo in ('instagram_url', 'facebook_url', 'favicon_url'):
         if campo in dados:
             limpos[campo] = _url_segura(dados.get(campo))
     for campo in ('cor_principal', 'cor_destaque'):
@@ -1247,7 +1247,7 @@ def put_conteudo():
     for chave, valor in (dados.get('links') or {}).items():
         url = str(valor or '').strip()
         # links podem ser páginas do site ("contato.html"), âncoras, tel:, mailto: ou http(s)
-        if CHAVE_CMS.match(chave) and (re.match(r'^(https?://|/|#|tel:|mailto:)', url, re.I) or re.match(r'^[\w-]+\.html', url)):
+        if CHAVE_CMS.match(chave) and (re.match(r'^(https?://|/|#|tel:|mailto:)', url, re.I) or re.match(r'^[\w-]+(\.html)?([?#]\S*)?$', url)):
             alteracoes['links'][chave] = url[:500]
     store.salvar_conteudo(alteracoes)
     _cache_paginas.clear()
@@ -1308,6 +1308,14 @@ def _renderizar_pagina(nome, editar=False):
                 a['rel'] = 'noopener'
             elif a.get('href') in ('#', None) and not conteudo.get('links', {}).get(a.get('data-cms-link')):
                 a.decompose()  # sem link cadastrado: esconde o ícone em vez de levar a lugar nenhum
+    # Ícone da aba escolhido no admin
+    if config.get('favicon_url'):
+        for icone in soup.find_all('link', rel='icon'):
+            icone['href'] = config['favicon_url']
+            icone.attrs.pop('type', None)
+    # Endereços limpos: links antigos "sobre.html" (inclusive os salvos no editor) viram "sobre"
+    for a in soup.find_all('a', href=True):
+        a['href'] = _endereco_limpo(a['href'])
 
     if soup.head:
         principal, destaque = config['cor_principal'], config['cor_destaque']
@@ -1333,6 +1341,18 @@ def _renderizar_pagina(nome, editar=False):
     return html
 
 
+RE_LINK_PAGINA = re.compile(r'^([\w-]+)\.html((?:[?#].*)?)$')
+
+
+def _endereco_limpo(href):
+    """'sobre.html?x=1' -> 'sobre?x=1'; 'index.html' -> '/'. Outros endereços ficam como estão."""
+    m = RE_LINK_PAGINA.match(href.strip())
+    if not m:
+        return href
+    nome, resto = m.groups()
+    return ('/' + resto) if nome == 'index' else nome + resto
+
+
 def _resposta_pagina(nome, status=200):
     editar = request.args.get('editar') == '1'
     resposta = make_response(_renderizar_pagina(nome, editar), status)
@@ -1354,8 +1374,7 @@ def home():
 
 # ---------- Para o Google: robots.txt e mapa do site ----------
 
-PAGINAS_DO_MAPA = ['', 'sobre.html', 'imoveis.html', 'portfolio.html', 'simulador.html', 'depoimentos.html',
-                   'blog.html', 'contato.html', 'privacidade.html']
+PAGINAS_DO_MAPA = ['', 'sobre', 'imoveis', 'portfolio', 'simulador', 'depoimentos', 'blog', 'contato', 'privacidade']
 
 
 def _endereco_do_site():
@@ -1367,6 +1386,7 @@ def _endereco_do_site():
 def robots_txt():
     texto = ('User-agent: *\n'
              'Allow: /\n'
+             'Disallow: /admin\n'
              'Disallow: /admin.html\n'
              'Disallow: /api/\n'
              f'\nSitemap: {_endereco_do_site()}sitemap.xml\n')
@@ -1380,9 +1400,9 @@ def sitemap_xml():
     from xml.sax.saxutils import escape
     base = _endereco_do_site()
     enderecos = [base + p for p in PAGINAS_DO_MAPA]
-    enderecos += [f'{base}imovel.html?id={im["id"]}' for im in store.listar_imoveis()]
-    enderecos += [f'{base}empreendimento.html?id={emp["id"]}' for emp in store.listar_empreendimentos()]
-    enderecos += [f'{base}blog-post.html?id={post["id"]}' for post in store.listar_posts()]
+    enderecos += [f'{base}imovel?id={im["id"]}' for im in store.listar_imoveis()]
+    enderecos += [f'{base}empreendimento?id={emp["id"]}' for emp in store.listar_empreendimentos()]
+    enderecos += [f'{base}blog-post?id={post["id"]}' for post in store.listar_posts()]
     itens = ''.join(f'<url><loc>{escape(e)}</loc></url>' for e in enderecos)
     xml = ('<?xml version="1.0" encoding="UTF-8"?>'
            f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{itens}</urlset>')
@@ -1391,11 +1411,33 @@ def sitemap_xml():
     return resposta
 
 
+def _redirecionar(destino):
+    consulta = request.query_string.decode('utf-8', 'replace')
+    return redirect(destino + (f'?{consulta}' if consulta else ''), code=301)
+
+
 @app.get('/<path:caminho>')
 def arquivo_publico(caminho):
     partes = caminho.split('/')
     if any(p.startswith('.') or p == '' for p in partes):
         abort(404)
+    if len(partes) == 1 and '.' not in caminho:
+        # Endereço limpo: /sobre -> sobre.html, /admin -> painel; /index volta para /
+        if caminho == 'index':
+            return _redirecionar('/')
+        if caminho == 'admin':
+            return send_from_directory(SITE_DIR, 'admin.html')
+        arquivo = caminho + '.html'
+        if arquivo in PAGINAS_OCULTAS or caminho == '404' or not os.path.isfile(os.path.join(SITE_DIR, arquivo)):
+            abort(404)
+        return _resposta_pagina(arquivo)
+    if len(partes) == 1 and caminho.endswith('.html') and caminho not in PAGINAS_OCULTAS:
+        # Endereço antigo com .html: manda (301) para o limpo, mantendo ?id=... etc.
+        nome = caminho[:-5]
+        if nome == 'index':
+            return _redirecionar('/')
+        if nome == 'admin' or os.path.isfile(os.path.join(SITE_DIR, caminho)):
+            return _redirecionar('/' + nome)
     if len(partes) == 1:
         if not caminho.endswith('.html') or caminho in PAGINAS_OCULTAS:
             abort(404)

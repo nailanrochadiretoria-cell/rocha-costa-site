@@ -467,6 +467,7 @@ CONFIG_PADRAO = {
     'whatsapp_mensagem': 'Quero mais informações sobre o imóvel escolhido.',
     'instagram_url': '',
     'facebook_url': '',
+    'favicon_url': '',            # ícone da aba do navegador (vazio = img/favicon.png)
     'cor_principal': '#001F3E',
     'cor_destaque': '#E3052D',
 }

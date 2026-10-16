@@ -7,15 +7,15 @@
    ========================================================= */
 
 const BUSCA_SECOES = [
-  { url: 'index.html', titulo: 'Início', palavras: ['inicio', 'home', 'pagina inicial'] },
-  { url: 'sobre.html', titulo: 'Sobre nós', palavras: ['sobre', 'historia', 'quem somos', 'valores', 'empresa', 'construtora'] },
-  { url: 'portfolio.html', titulo: 'Portfólio de obras', palavras: ['portfolio', 'obras', 'empreendimentos entregues', 'projetos entregues'] },
-  { url: 'imoveis.html', titulo: 'Catálogo de imóveis', palavras: ['imoveis', 'imovel', 'casas', 'apartamentos', 'comprar', 'catalogo', 'terrenos'] },
-  { url: 'simulador.html', titulo: 'Simulador de financiamento', palavras: ['simulador', 'simulacao', 'financiamento', 'financiar', 'parcela', 'juros', 'entrada', 'mcmv', 'minha casa minha vida'] },
-  { url: 'depoimentos.html', titulo: 'Depoimentos de clientes', palavras: ['depoimentos', 'avaliacoes', 'clientes', 'opinioes', 'quem comprou'] },
-  { url: 'blog.html', titulo: 'Blog', palavras: ['blog', 'noticias', 'artigos', 'conteudo', 'dicas'] },
-  { url: 'contato.html', titulo: 'Contato / onde atuamos', palavras: ['contato', 'telefone', 'whatsapp', 'email', 'endereco', 'onde atuamos', 'onde voces atuam', 'localizacao', 'regiao', 'atuacao', 'mapa', 'petrolina', 'agendar visita'] },
-  { url: 'privacidade.html', titulo: 'Política de Privacidade', palavras: ['privacidade', 'lgpd', 'termos', 'dados'] },
+  { url: '/', titulo: 'Início', palavras: ['inicio', 'home', 'pagina inicial'] },
+  { url: 'sobre', titulo: 'Sobre nós', palavras: ['sobre', 'historia', 'quem somos', 'valores', 'empresa', 'construtora'] },
+  { url: 'portfolio', titulo: 'Portfólio de obras', palavras: ['portfolio', 'obras', 'empreendimentos entregues', 'projetos entregues'] },
+  { url: 'imoveis', titulo: 'Catálogo de imóveis', palavras: ['imoveis', 'imovel', 'casas', 'apartamentos', 'comprar', 'catalogo', 'terrenos'] },
+  { url: 'simulador', titulo: 'Simulador de financiamento', palavras: ['simulador', 'simulacao', 'financiamento', 'financiar', 'parcela', 'juros', 'entrada', 'mcmv', 'minha casa minha vida'] },
+  { url: 'depoimentos', titulo: 'Depoimentos de clientes', palavras: ['depoimentos', 'avaliacoes', 'clientes', 'opinioes', 'quem comprou'] },
+  { url: 'blog', titulo: 'Blog', palavras: ['blog', 'noticias', 'artigos', 'conteudo', 'dicas'] },
+  { url: 'contato', titulo: 'Contato / onde atuamos', palavras: ['contato', 'telefone', 'whatsapp', 'email', 'endereco', 'onde atuamos', 'onde voces atuam', 'localizacao', 'regiao', 'atuacao', 'mapa', 'petrolina', 'agendar visita'] },
+  { url: 'privacidade', titulo: 'Política de Privacidade', palavras: ['privacidade', 'lgpd', 'termos', 'dados'] },
 ];
 
 function _semAcento(txt) {
@@ -91,7 +91,7 @@ async function _buscarImoveisRelevantes(consulta, filtros) {
     tipo: 'imovel',
     titulo: im.titulo,
     meta: `${[im.bairro, im.cidade].filter(Boolean).join(', ')} · ${formatarPrecoImovel(im.preco)}`,
-    url: `imovel.html?id=${im.id}`,
+    url: `imovel?id=${im.id}`,
   }));
 }
 
@@ -194,7 +194,7 @@ function iniciarBuscaHeader() {
     if (resultadosAtuais.length) {
       window.location.href = resultadosAtuais[0].url;
     } else if (input.value.trim()) {
-      window.location.href = `imoveis.html?busca=${encodeURIComponent(input.value.trim())}`;
+      window.location.href = `imoveis?busca=${encodeURIComponent(input.value.trim())}`;
     }
   });
 }

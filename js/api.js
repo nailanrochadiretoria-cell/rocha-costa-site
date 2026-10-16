@@ -34,7 +34,7 @@ function cardDepoimentoHTML(d) {
 // site ou http(s). Qualquer outra coisa (ex.: "javascript:") vira o fallback.
 function urlSegura(valor, fallback = '') {
   const url = String(valor || '').trim();
-  if (/^https?:\/\//i.test(url) || (url.startsWith('/') && !url.startsWith('//')) || /^[\w-]+\.html/.test(url)) {
+  if (/^https?:\/\//i.test(url) || (url.startsWith('/') && !url.startsWith('//')) || /^[\w-]+(\.html)?([?#]\S*)?$/.test(url)) {
     return escHTML(url);
   }
   return escHTML(fallback);

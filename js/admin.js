@@ -707,6 +707,8 @@ async function carregarConfigAdmin() {
   document.getElementById('cfg-facebook').value = cfg.facebook_url || '';
   document.getElementById('cfg-cor-principal').value = cfg.cor_principal || CORES_ORIGINAIS.principal;
   document.getElementById('cfg-cor-destaque').value = cfg.cor_destaque || CORES_ORIGINAIS.destaque;
+  document.getElementById('cfg-favicon').value = cfg.favicon_url || '';
+  document.getElementById('cfg-favicon-previa').src = cfg.favicon_url || 'img/favicon.png';
 }
 
 function iniciarFormConfig() {
@@ -732,6 +734,7 @@ function iniciarFormConfig() {
         facebook_url: document.getElementById('cfg-facebook').value.trim(),
         cor_principal: document.getElementById('cfg-cor-principal').value,
         cor_destaque: document.getElementById('cfg-cor-destaque').value,
+        favicon_url: document.getElementById('cfg-favicon').value,
       });
       status.textContent = '';
       avisar('Configurações salvas! Já valem para todo o site.');
@@ -741,6 +744,27 @@ function iniciarFormConfig() {
       status.textContent = `Erro: ${err.message}`;
     }
   }
+  document.getElementById('cfg-favicon-arquivo').addEventListener('change', async (e) => {
+    const arquivo = e.target.files[0];
+    e.target.value = '';
+    if (!arquivo) return;
+    const statusIcone = document.getElementById('cfg-favicon-status');
+    statusIcone.textContent = 'Enviando...';
+    try {
+      const { url } = await apiUploadImagem(arquivo);
+      document.getElementById('cfg-favicon').value = url;
+      document.getElementById('cfg-favicon-previa').src = url;
+      statusIcone.textContent = 'Imagem enviada. Clique em "Salvar configurações" para aplicar no site.';
+    } catch (err) {
+      if (err.sessaoExpirada) return tratarSessaoExpirada();
+      statusIcone.textContent = `Erro: ${err.message}`;
+    }
+  });
+  document.getElementById('cfg-favicon-padrao').addEventListener('click', () => {
+    document.getElementById('cfg-favicon').value = '';
+    document.getElementById('cfg-favicon-previa').src = 'img/favicon.png';
+    document.getElementById('cfg-favicon-status').textContent = 'Ícone original selecionado. Clique em "Salvar configurações" para aplicar.';
+  });
   document.getElementById('cfg-cores-padrao').addEventListener('click', () => {
     document.getElementById('cfg-cor-principal').value = CORES_ORIGINAIS.principal;
     document.getElementById('cfg-cor-destaque').value = CORES_ORIGINAIS.destaque;
@@ -752,7 +776,8 @@ function iniciarFormConfig() {
 async function _urlDaPaginaEditor() {
   const select = document.getElementById('editor-pagina');
   const opcao = select.selectedOptions[0];
-  let url = `/${select.value}?editar=1`;
+  const nome = select.value.replace('.html', '');
+  let url = `${nome === 'index' ? '/' : `/${nome}`}?editar=1`;
   const fonte = opcao.getAttribute('data-precisa-id');
   if (fonte) {
     // Páginas de detalhe precisam de um item de exemplo para abrir

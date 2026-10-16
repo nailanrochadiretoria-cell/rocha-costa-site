@@ -191,7 +191,7 @@
     caixa.className = 'cms-link-editor';
     caixa.innerHTML = `
       <label>Endereço deste link/botão
-        <input type="text" inputmode="url" autocomplete="off" placeholder="ex.: contato.html ou https://...">
+        <input type="text" inputmode="url" autocomplete="off" placeholder="ex.: contato ou https://...">
       </label>
       <div><button type="button" class="cms-cancelar">Cancelar</button><button type="button" class="cms-aplicar" style="background:var(--red);color:#fff;">Aplicar</button></div>`;
     const input = caixa.querySelector('input');
@@ -199,8 +199,8 @@
     caixa.querySelector('.cms-cancelar').addEventListener('click', () => caixa.remove());
     caixa.querySelector('.cms-aplicar').addEventListener('click', () => {
       const url = input.value.trim();
-      if (!/^(https?:\/\/|\/|#|tel:|mailto:)/i.test(url) && !/^[\w-]+\.html/.test(url)) {
-        avisar('Use um endereço do site (ex.: contato.html) ou completo (https://...).');
+      if (!/^(https?:\/\/|\/|#|tel:|mailto:)/i.test(url) && !/^[\w-]+(\.html)?([?#]\S*)?$/.test(url)) {
+        avisar('Use um endereço do site (ex.: contato) ou completo (https://...).');
         return;
       }
       guardarOriginal(a, 'link');
