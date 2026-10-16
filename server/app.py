@@ -1343,6 +1343,45 @@ def home():
     return _resposta_pagina('index.html')
 
 
+# ---------- Para o Google: robots.txt e mapa do site ----------
+
+PAGINAS_DO_MAPA = ['', 'sobre.html', 'imoveis.html', 'portfolio.html', 'simulador.html', 'depoimentos.html',
+                   'blog.html', 'contato.html', 'privacidade.html']
+
+
+def _endereco_do_site():
+    esquema = 'https' if _requisicao_https() else request.scheme
+    return f'{esquema}://{request.host}/'
+
+
+@app.get('/robots.txt')
+def robots_txt():
+    texto = ('User-agent: *\n'
+             'Allow: /\n'
+             'Disallow: /admin.html\n'
+             'Disallow: /api/\n'
+             f'\nSitemap: {_endereco_do_site()}sitemap.xml\n')
+    resposta = make_response(texto)
+    resposta.headers['Content-Type'] = 'text/plain; charset=utf-8'
+    return resposta
+
+
+@app.get('/sitemap.xml')
+def sitemap_xml():
+    from xml.sax.saxutils import escape
+    base = _endereco_do_site()
+    enderecos = [base + p for p in PAGINAS_DO_MAPA]
+    enderecos += [f'{base}imovel.html?id={im["id"]}' for im in store.listar_imoveis()]
+    enderecos += [f'{base}empreendimento.html?id={emp["id"]}' for emp in store.listar_empreendimentos()]
+    enderecos += [f'{base}blog-post.html?id={post["id"]}' for post in store.listar_posts()]
+    itens = ''.join(f'<url><loc>{escape(e)}</loc></url>' for e in enderecos)
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>'
+           f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{itens}</urlset>')
+    resposta = make_response(xml)
+    resposta.headers['Content-Type'] = 'application/xml; charset=utf-8'
+    return resposta
+
+
 @app.get('/<path:caminho>')
 def arquivo_publico(caminho):
     partes = caminho.split('/')
