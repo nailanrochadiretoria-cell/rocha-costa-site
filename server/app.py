@@ -594,7 +594,7 @@ def _truncar_strings(dados, limite=LIMITE_STRING_PADRAO):
 
 CAMPOS_IMOVEL_PERMITIDOS = {
     'titulo', 'tipo', 'status', 'bairro', 'cidade', 'estado', 'preco',
-    'area', 'quartos', 'banheiros', 'vagas', 'destaque', 'imagem', 'descricao',
+    'area', 'quartos', 'banheiros', 'vagas', 'destaque', 'imagem', 'imagens', 'descricao',
     'empreendimento_id', 'localizacao',
 }
 
@@ -632,6 +632,11 @@ def _filtrar_campos_imovel(dados):
         limpos['destaque'] = bool(limpos['destaque'])
     if 'imagem' in limpos:
         limpos['imagem'] = _url_segura(limpos['imagem'])
+    if 'imagens' in limpos:
+        # Galeria de fotos; a primeira é a capa e também fica em "imagem" (usada nos cartões)
+        imagens = limpos['imagens'] if isinstance(limpos['imagens'], list) else []
+        limpos['imagens'] = [u for u in (_url_segura(i) for i in imagens) if u][:30]
+        limpos['imagem'] = limpos['imagens'][0] if limpos['imagens'] else ''
     if 'localizacao' in limpos:
         # {lat, lng} válidos ou None (sem posição própria: usa a da obra ou o bairro)
         loc = limpos['localizacao'] if isinstance(limpos['localizacao'], dict) else {}

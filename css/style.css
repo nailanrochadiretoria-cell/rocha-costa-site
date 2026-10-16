@@ -637,7 +637,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--r
 /* Galeria de fotos arrastável (admin > Empreendimentos) */
 .admin-galeria { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
 .admin-galeria-item {
-  position: relative; width: 96px; height: 72px; border-radius: 8px; overflow: hidden;
+  position: relative; width: 120px; height: 90px; border-radius: 8px; overflow: hidden;
   cursor: grab; border: 2px solid transparent; background: var(--gray-100);
 }
 .admin-galeria-item.capa { border-color: var(--red); }
@@ -1875,3 +1875,26 @@ a.dash-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
 .form-card--editando { box-shadow: 0 0 0 2px var(--red), var(--shadow); }
 .form-row--3 { grid-template-columns: repeat(3, 1fr); }
 @media (max-width: 860px) { .form-row--3 { grid-template-columns: 1fr; } }
+
+/* ---------- Galeria de fotos do imóvel ---------- */
+.admin-galeria-url { display: flex; gap: 8px; margin-top: 8px; }
+.admin-galeria-url input { flex: 1; min-width: 0; }
+.admin-galeria-setas { position: absolute; left: 4px; right: 4px; top: 50%; transform: translateY(-50%); display: flex; justify-content: space-between; pointer-events: none; }
+.admin-galeria-setas button { pointer-events: auto; }
+.admin-galeria-setas button { width: 28px; height: 26px; border: none; border-radius: 6px; background: rgba(0, 19, 39, .78); color: #fff; font-size: 11px; cursor: pointer; }
+.admin-galeria-setas button:disabled { opacity: 0; pointer-events: none; }
+.galeria-imovel { min-width: 0; }
+.galeria-imovel-principal { position: relative; }
+.galeria-imovel-principal img { aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.galeria-seta { position: absolute; top: 50%; transform: translateY(-50%); width: 46px; height: 46px; border: none; border-radius: 50%;
+  background: rgba(255, 255, 255, .92); color: #141a26; font-size: 30px; line-height: 1; cursor: pointer; box-shadow: 0 6px 18px rgba(0, 0, 0, .25); }
+.galeria-seta:hover { background: #fff; }
+.galeria-seta--ant { left: 12px; }
+.galeria-seta--prox { right: 12px; }
+.galeria-contador { position: absolute; right: 12px; bottom: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(0, 0, 0, .6); color: #fff; font: 600 .8rem/1.4 var(--font-sub, sans-serif); }
+.galeria-miniaturas { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x proximity; }
+.galeria-mini { flex: 0 0 84px; height: 64px; padding: 0; border: 2px solid transparent; border-radius: 10px; overflow: hidden; cursor: pointer; background: none; opacity: .7; scroll-snap-align: start; }
+.galeria-mini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.galeria-mini.ativa { border-color: var(--red); opacity: 1; }
+.galeria-mini:hover { opacity: 1; }
+@media (max-width: 640px) { .galeria-seta { width: 38px; height: 38px; font-size: 24px; } .galeria-mini { flex-basis: 68px; height: 52px; } }

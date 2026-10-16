@@ -53,15 +53,28 @@ async function iniciarDetalheImovel() {
   }
   const consultaUrl = encodeURIComponent(consultaMapa);
 
-  // Antes havia 3 miniaturas fixas do picsum (fotos aleatórias que não eram do
-  // imóvel). Agora mostra só a foto cadastrada, com zoom ao passar o mouse.
+  // Fotos: a galeria cadastrada no admin (a primeira é a capa); imóveis antigos têm só "imagem"
+  const fotos = (im.imagens && im.imagens.length ? im.imagens : [im.imagem]).filter(Boolean);
+  if (!fotos.length) fotos.push(IMAGEM_PADRAO_IMOVEL);
+  const varias = fotos.length > 1;
+
   container.innerHTML = `
     <div class="breadcrumb" style="margin-bottom:20px;">
       <a href="index.html">Início</a> / <a href="imoveis.html">Imóveis</a> / ${escHTML(im.titulo)}
     </div>
     <div class="grid grid-2" style="align-items:flex-start;">
-      <div class="detalhe-foto" data-anim="zoom">
-        <img src="${urlSegura(im.imagem, IMAGEM_PADRAO_IMOVEL)}" alt="${escHTML(im.titulo)}" onerror="this.onerror=null;this.src='${IMAGEM_PADRAO_IMOVEL}';this.classList.add('img-fallback')">
+      <div class="galeria-imovel" data-anim="zoom">
+        <div class="detalhe-foto galeria-imovel-principal">
+          <img id="galeria-foto" src="${urlSegura(fotos[0], IMAGEM_PADRAO_IMOVEL)}" alt="${escHTML(im.titulo)}" onerror="this.onerror=null;this.src='${IMAGEM_PADRAO_IMOVEL}';this.classList.add('img-fallback')">
+          ${varias ? `
+          <button type="button" class="galeria-seta galeria-seta--ant" data-galeria-passo="-1" aria-label="Foto anterior">‹</button>
+          <button type="button" class="galeria-seta galeria-seta--prox" data-galeria-passo="1" aria-label="Próxima foto">›</button>
+          <span class="galeria-contador" id="galeria-contador">1 / ${fotos.length}</span>` : ''}
+        </div>
+        ${varias ? `
+        <div class="galeria-miniaturas" role="list">
+          ${fotos.map((url, i) => `<button type="button" class="galeria-mini${i === 0 ? ' ativa' : ''}" data-galeria-ir="${i}" aria-label="Ver foto ${i + 1}" role="listitem"><img src="${urlSegura(url)}" alt="" loading="lazy"></button>`).join('')}
+        </div>` : ''}
       </div>
       <div data-anim="left">
         ${im.status ? `<span class="tag ${badgeStatusClasse(im.status)}">${escHTML(im.status)}</span>` : ''}
@@ -112,6 +125,7 @@ async function iniciarDetalheImovel() {
   `;
 
   ligarBotoesWhatsApp(container);
+  if (varias) iniciarGaleriaImovel(fotos);
 
   let todosImoveis = [];
   try {
@@ -129,6 +143,37 @@ async function iniciarDetalheImovel() {
     return;
   }
   renderGridImoveis(listaFinal, 'relacionados-grid');
+}
+
+// Setas, miniaturas, teclado (← →) e arrastar o dedo trocam a foto grande
+function iniciarGaleriaImovel(fotos) {
+  const foto = document.getElementById('galeria-foto');
+  const contador = document.getElementById('galeria-contador');
+  const minis = [...document.querySelectorAll('[data-galeria-ir]')];
+  let atual = 0;
+  function mostrar(i) {
+    atual = (i + fotos.length) % fotos.length;
+    foto.src = urlSegura(fotos[atual], IMAGEM_PADRAO_IMOVEL);
+    contador.textContent = `${atual + 1} / ${fotos.length}`;
+    minis.forEach((m, j) => m.classList.toggle('ativa', j === atual));
+    minis[atual]?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+  document.querySelectorAll('[data-galeria-passo]').forEach((b) => b.addEventListener('click', () => mostrar(atual + Number(b.dataset.galeriaPasso))));
+  minis.forEach((m) => m.addEventListener('click', () => mostrar(Number(m.dataset.galeriaIr))));
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest('input, textarea, select')) return;
+    if (e.key === 'ArrowLeft') mostrar(atual - 1);
+    if (e.key === 'ArrowRight') mostrar(atual + 1);
+  });
+  let inicioX = null;
+  const principal = foto.parentElement;
+  principal.addEventListener('touchstart', (e) => { inicioX = e.touches[0].clientX; }, { passive: true });
+  principal.addEventListener('touchend', (e) => {
+    if (inicioX === null) return;
+    const dx = e.changedTouches[0].clientX - inicioX;
+    if (Math.abs(dx) > 40) mostrar(atual + (dx < 0 ? 1 : -1));
+    inicioX = null;
+  });
 }
 
 document.addEventListener('DOMContentLoaded', iniciarDetalheImovel);

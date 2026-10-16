@@ -243,6 +243,8 @@ function tratarSessaoExpirada() {
 }
 
 // ---- Seção: Imóveis ----
+let _imovelGaleriaAtual = []; // fotos do imóvel em edição, na ordem (a primeira é a capa)
+
 async function renderAdminImoveis() {
   const tbody = document.getElementById('admin-imoveis-tbody');
   if (!tbody) return;
@@ -313,7 +315,9 @@ async function renderAdminImoveis() {
       val('imovel-quartos', item.quartos);
       val('imovel-banheiros', item.banheiros);
       val('imovel-vagas', item.vagas);
-      val('imovel-imagem', item.imagem);
+      val('imovel-imagem', '');
+      _imovelGaleriaAtual = [...(item.imagens && item.imagens.length ? item.imagens : (item.imagem ? [item.imagem] : []))];
+      renderGaleria('imovel-imagens-lista', _imovelGaleriaAtual);
       val('imovel-descricao', item.descricao);
       val('imovel-empreendimento', item.empreendimento_id || '');
       document.getElementById('imovel-destaque').checked = !!item.destaque;
@@ -324,20 +328,11 @@ async function renderAdminImoveis() {
       document.getElementById('imovel-mapa-status').textContent = loc
         ? 'Este imóvel tem posição própria no mapa. Apague o campo para voltar a usar a da obra/bairro.'
         : 'Em branco, o mapa do imóvel mostra a posição da obra escolhida acima ou, se não houver obra, o bairro.';
-      atualizarPreviewImovel();
       document.getElementById('imovel-upload-status').textContent = '';
       modoEdicao('imovel', `Editar imóvel: ${item.titulo || ''}`);
       document.getElementById('form-imovel').scrollIntoView({ behavior: 'smooth' });
     });
   });
-}
-
-function atualizarPreviewImovel() {
-  const url = document.getElementById('imovel-imagem')?.value.trim();
-  const img = document.getElementById('imovel-imagem-preview');
-  if (!img) return;
-  img.hidden = !url;
-  if (url) img.src = url;
 }
 
 function limparFormImovel() {
@@ -348,7 +343,8 @@ function limparFormImovel() {
   document.getElementById('imovel-lat').value = '';
   document.getElementById('imovel-lng').value = '';
   document.getElementById('imovel-mapa-status').textContent = 'Em branco, o mapa do imóvel mostra a posição da obra escolhida acima ou, se não houver obra, o bairro.';
-  atualizarPreviewImovel();
+  _imovelGaleriaAtual = [];
+  renderGaleria('imovel-imagens-lista', _imovelGaleriaAtual);
   modoEdicao('imovel', null);
 }
 
@@ -372,7 +368,26 @@ function iniciarFormImovel() {
   const form = document.getElementById('form-imovel');
   if (!form) return;
 
-  document.getElementById('imovel-imagem').addEventListener('input', atualizarPreviewImovel);
+  // Foto por endereço (URL): botão "Adicionar" ou Enter
+  const campoUrl = document.getElementById('imovel-imagem');
+  const adicionarUrl = () => {
+    const url = campoUrl.value.trim();
+    if (!url) return;
+    if (!/^(https?:\/\/|\/)/i.test(url)) {
+      avisar('Cole um endereço que comece com https://', 'erro');
+      return;
+    }
+    _imovelGaleriaAtual.push(url);
+    campoUrl.value = '';
+    renderGaleria('imovel-imagens-lista', _imovelGaleriaAtual);
+  };
+  document.getElementById('imovel-imagem-adicionar').addEventListener('click', adicionarUrl);
+  campoUrl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      adicionarUrl();
+    }
+  });
 
   // Localização própria do imóvel: colar link do Google Maps
   document.getElementById('imovel-mapa-link').addEventListener('input', (e) => {
@@ -386,21 +401,8 @@ function iniciarFormImovel() {
     else if (/goo\.gl|maps\.app/.test(texto)) status.textContent = 'Link encurtado não traz a posição. Abra-o no navegador e copie o endereço completo da barra.';
     else status.textContent = 'Não encontrei a posição nesse texto. Cole o endereço completo do Google Maps ou digite "latitude, longitude".';
   });
-  document.getElementById('imovel-imagem-arquivo').addEventListener('change', async (e) => {
-    const arquivo = e.target.files[0];
-    if (!arquivo) return;
-    const status = document.getElementById('imovel-upload-status');
-    status.textContent = 'Enviando foto...';
-    try {
-      const { url } = await apiUploadImagem(arquivo);
-      document.getElementById('imovel-imagem').value = url;
-      atualizarPreviewImovel();
-      status.textContent = 'Foto enviada. Clique em "Salvar" para gravar o imóvel.';
-    } catch (err) {
-      if (err.sessaoExpirada) return tratarSessaoExpirada();
-      status.textContent = `Erro: ${err.message}`;
-    }
-    e.target.value = '';
+  document.getElementById('imovel-imagem-arquivo').addEventListener('change', (e) => {
+    enviarFotosParaGaleria(e.target, _imovelGaleriaAtual, 'imovel-imagens-lista', 'imovel-upload-status');
   });
 
   form.addEventListener('submit', (e) => {
@@ -422,7 +424,7 @@ function iniciarFormImovel() {
       quartos: num('imovel-quartos'),
       banheiros: num('imovel-banheiros'),
       vagas: num('imovel-vagas'),
-      imagem: document.getElementById('imovel-imagem').value.trim(),
+      imagens: [..._imovelGaleriaAtual],
       descricao: document.getElementById('imovel-descricao').value.trim(),
       empreendimento_id: document.getElementById('imovel-empreendimento').value || null,
       destaque: document.getElementById('imovel-destaque').checked,
@@ -872,24 +874,39 @@ async function renderAdminEmpreendimentos() {
   });
 }
 
-function renderGaleriaEmpreendimento() {
-  const wrap = document.getElementById('emp-imagens-lista');
-  wrap.innerHTML = _empGaleriaAtual.map((url, i) => `
+// Galeria de fotos do formulário (a primeira é a capa). Reordena com as setas
+// (funciona no celular) ou arrastando com o mouse; o × remove a foto.
+function renderGaleria(idLista, lista) {
+  const wrap = document.getElementById(idLista);
+  if (!wrap) return;
+  const desenhar = () => renderGaleria(idLista, lista);
+  wrap.innerHTML = lista.map((url, i) => `
     <div class="admin-galeria-item${i === 0 ? ' capa' : ''}" draggable="true" data-idx="${i}">
       <img src="${urlSegura(url)}" alt="">
       ${i === 0 ? '<span class="admin-galeria-capa-label">CAPA</span>' : ''}
       <button type="button" class="admin-galeria-remover" data-remover-foto="${i}" aria-label="Remover foto">&times;</button>
+      <span class="admin-galeria-setas">
+        <button type="button" data-mover-foto="${i}" data-passo="-1" aria-label="Mover para a esquerda"${i === 0 ? ' disabled' : ''}>◀</button>
+        <button type="button" data-mover-foto="${i}" data-passo="1" aria-label="Mover para a direita"${i === lista.length - 1 ? ' disabled' : ''}>▶</button>
+      </span>
     </div>`).join('');
 
   wrap.querySelectorAll('[data-remover-foto]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const idx = Number(btn.getAttribute('data-remover-foto'));
-      _empGaleriaAtual.splice(idx, 1);
-      renderGaleriaEmpreendimento();
+      lista.splice(Number(btn.getAttribute('data-remover-foto')), 1);
+      desenhar();
+    });
+  });
+  wrap.querySelectorAll('[data-mover-foto]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const de = Number(btn.getAttribute('data-mover-foto'));
+      const para = de + Number(btn.getAttribute('data-passo'));
+      if (para < 0 || para >= lista.length) return;
+      [lista[de], lista[para]] = [lista[para], lista[de]];
+      desenhar();
     });
   });
 
-  // Reordenar por arraste (a primeira posição vira a capa)
   let origemArraste = null;
   wrap.querySelectorAll('.admin-galeria-item').forEach((item) => {
     item.addEventListener('dragstart', () => {
@@ -901,12 +918,39 @@ function renderGaleriaEmpreendimento() {
     item.addEventListener('drop', () => {
       const destino = Number(item.getAttribute('data-idx'));
       if (origemArraste === null || origemArraste === destino) return;
-      const [movido] = _empGaleriaAtual.splice(origemArraste, 1);
-      _empGaleriaAtual.splice(destino, 0, movido);
+      const [movido] = lista.splice(origemArraste, 1);
+      lista.splice(destino, 0, movido);
       origemArraste = null;
-      renderGaleriaEmpreendimento();
+      desenhar();
     });
   });
+}
+
+// Envia várias fotos e coloca na galeria (usado por imóveis e empreendimentos)
+async function enviarFotosParaGaleria(input, lista, idLista, idStatus) {
+  const arquivos = [...input.files];
+  input.value = '';
+  if (!arquivos.length) return;
+  const status = document.getElementById(idStatus);
+  let enviadas = 0;
+  for (const arquivo of arquivos) {
+    status.textContent = `Enviando foto ${enviadas + 1} de ${arquivos.length}...`;
+    try {
+      const { url } = await apiUploadImagem(arquivo);
+      lista.push(url);
+      enviadas += 1;
+      renderGaleria(idLista, lista);
+    } catch (err) {
+      if (err.sessaoExpirada) return tratarSessaoExpirada();
+      status.textContent = `Erro na foto "${arquivo.name}": ${err.message}`;
+      return;
+    }
+  }
+  status.textContent = `${enviadas} foto(s) enviada(s). Clique em "Salvar" para gravar.`;
+}
+
+function renderGaleriaEmpreendimento() {
+  renderGaleria('emp-imagens-lista', _empGaleriaAtual);
 }
 
 // Extrai latitude/longitude de um link do Google Maps (ou de "lat, lng" digitado)
@@ -1001,23 +1045,8 @@ function iniciarFormEmpreendimento() {
     timerMapa = setTimeout(atualizarPreviaMapaEmpreendimento, 600);
   }));
 
-  document.getElementById('emp-imagens-arquivo').addEventListener('change', async (e) => {
-    const arquivos = [...e.target.files];
-    if (!arquivos.length) return;
-    const status = document.getElementById('emp-upload-status');
-    status.textContent = `Enviando ${arquivos.length} foto(s)...`;
-    try {
-      for (const arquivo of arquivos) {
-        const { url } = await apiUploadImagem(arquivo);
-        _empGaleriaAtual.push(url);
-      }
-      renderGaleriaEmpreendimento();
-      status.textContent = 'Fotos enviadas com sucesso.';
-    } catch (err) {
-      if (err.sessaoExpirada) return tratarSessaoExpirada();
-      status.textContent = `Erro: ${err.message}`;
-    }
-    e.target.value = '';
+  document.getElementById('emp-imagens-arquivo').addEventListener('change', (e) => {
+    enviarFotosParaGaleria(e.target, _empGaleriaAtual, 'emp-imagens-lista', 'emp-upload-status');
   });
 
   form.addEventListener('submit', (e) => {

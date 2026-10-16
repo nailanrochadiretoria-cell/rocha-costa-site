@@ -150,7 +150,7 @@ Documentação regularizada"></textarea>
             <label for="emp-imagens-arquivo">Fotos (pode selecionar várias de uma vez)</label>
             <input type="file" id="emp-imagens-arquivo" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
             <p class="form-note" id="emp-upload-status"></p>
-            <p class="form-note" style="margin-top:6px;">A primeira foto da lista é a capa (marcada em vermelho). Arraste as miniaturas para reordenar.</p>
+            <p class="form-note" style="margin-top:6px;">A primeira foto é a capa (marcada em vermelho). Use as setas ◀ ▶ ou arraste para mudar a ordem.</p>
             <div id="emp-imagens-lista" class="admin-galeria"></div>
           </div>
 
@@ -209,11 +209,15 @@ Documentação regularizada"></textarea>
             <div class="field"><label for="imovel-vagas">Vagas</label><input id="imovel-vagas" type="number" min="0" value="1"></div>
           </div>
           <div class="field" style="margin-bottom:18px;">
-            <label for="imovel-imagem-arquivo">Foto do imóvel (upload)</label>
-            <input type="file" id="imovel-imagem-arquivo" accept="image/png,image/jpeg,image/webp,image/gif">
-            <input id="imovel-imagem" placeholder="...ou cole a URL da foto" style="margin-top:8px;">
+            <label for="imovel-imagem-arquivo">Fotos do imóvel (pode selecionar várias de uma vez)</label>
+            <input type="file" id="imovel-imagem-arquivo" accept="image/png,image/jpeg,image/webp,image/gif" multiple>
+            <div class="admin-galeria-url">
+              <input id="imovel-imagem" placeholder="...ou cole o endereço (URL) de uma foto">
+              <button type="button" class="btn btn-sm btn-outline-navy" id="imovel-imagem-adicionar">Adicionar</button>
+            </div>
             <p class="form-note" id="imovel-upload-status"></p>
-            <img id="imovel-imagem-preview" class="admin-imovel-preview" alt="" hidden>
+            <p class="form-note" style="margin-top:6px;">A primeira foto é a capa (marcada em vermelho). Use as setas ◀ ▶ ou arraste para mudar a ordem.</p>
+            <div id="imovel-imagens-lista" class="admin-galeria"></div>
           </div>
           <div class="field" style="margin-bottom:18px;">
             <label for="imovel-mapa-link">Localização no mapa (opcional) — cole o link do Google Maps</label>
