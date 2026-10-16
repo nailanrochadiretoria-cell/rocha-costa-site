@@ -76,7 +76,6 @@
     <a href="#" data-admin-secao="secao-imoveis">Imóveis</a>
     <a href="#" data-admin-secao="secao-depoimentos">Depoimentos</a>
     <a href="#" data-admin-secao="secao-blog">Blog</a>
-    <a href="#" data-admin-secao="secao-simulador">Simulador</a>
     <a href="#" data-admin-secao="secao-leads">Leads</a>
     <a href="#" data-admin-secao="secao-config">Configurações</a>
     <a href="#" style="margin-top:20px;border-top:1px solid rgba(255,255,255,.1);padding-top:16px;" id="admin-logout">Sair</a>
@@ -344,71 +343,6 @@ Documentação regularizada"></textarea>
           </div>
         </form>
       </div>
-    </section>
-
-    <section id="secao-simulador" class="admin-section" style="display:none;">
-      <div class="admin-toolbar">
-        <h2 class="mt-0">Simulador de financiamento</h2>
-      </div>
-      <p class="form-note" style="margin-top:-10px;margin-bottom:16px;">Estas são as regras que a página <strong>Simulador</strong> usa para estimar a parcela. Quanto mais perto das condições reais do banco, mais perto da realidade fica o resultado para o cliente. Confira os números com o correspondente da Caixa sempre que o governo ou o banco mudar as regras.</p>
-      <form id="form-simulador-regras" novalidate>
-        <div class="form-card">
-          <h3 class="mt-0">Faixas do Minha Casa Minha Vida</h3>
-          <p class="form-note" style="margin-top:-6px;margin-bottom:14px;">O site escolhe a faixa pela <strong>renda bruta da família</strong>. Se o imóvel custar mais que o limite da faixa, o cálculo vai para o financiamento comum (abaixo).</p>
-          <div class="tabela-rolavel">
-            <table class="admin-table sim-faixas">
-              <thead><tr><th>Nome da faixa</th><th>Renda até (R$)</th><th>Imóvel até (R$)</th><th>Juros ao ano (%)</th><th>Financia até (% do imóvel)</th><th>Desconto estimado (R$)</th><th></th></tr></thead>
-              <tbody id="sim-faixas-tbody"></tbody>
-            </table>
-          </div>
-          <button type="button" class="btn btn-sm btn-outline-navy" id="sim-faixa-adicionar" style="margin-top:12px;">+ Adicionar faixa</button>
-          <p class="form-note" style="margin-top:10px;">"Desconto estimado" é o subsídio do governo que costuma sair para essa faixa. Ele varia com a renda e a cidade; use um valor conservador ou 0 para não prometer demais.</p>
-        </div>
-
-        <div class="form-card" style="margin-top:20px;">
-          <h3 class="mt-0">Financiamento fora do programa</h3>
-          <div class="form-row form-row--3">
-            <div class="field"><label for="sim-fora-nome">Nome</label><input id="sim-fora-nome" maxlength="80"></div>
-            <div class="field"><label for="sim-fora-taxa">Juros ao ano (%)</label><input id="sim-fora-taxa" type="number" step="0.01" min="0" max="40" required></div>
-            <div class="field"><label for="sim-fora-cota">Financia até (% do imóvel)</label><input id="sim-fora-cota" type="number" step="1" min="1" max="100" required></div>
-          </div>
-        </div>
-
-        <div class="form-card" style="margin-top:20px;">
-          <h3 class="mt-0">Regras gerais</h3>
-          <div class="form-row form-row--3">
-            <div class="field">
-              <label for="sim-sistema-padrao">Tipo de parcela que já vem marcado</label>
-              <select id="sim-sistema-padrao">
-                <option value="SAC">SAC (começa maior e diminui)</option>
-                <option value="PRICE">Price (parcela fixa)</option>
-              </select>
-            </div>
-            <div class="field"><label for="sim-comprometimento">Parcela máxima (% da renda)</label><input id="sim-comprometimento" type="number" step="0.5" min="5" max="100" required></div>
-            <div class="field"><label for="sim-prazo-max">Prazo máximo (anos)</label><input id="sim-prazo-max" type="number" step="1" min="1" max="50" required></div>
-          </div>
-          <div class="form-row form-row--3">
-            <div class="field"><label for="sim-idade-max">Idade + prazo no máximo (anos)</label><input id="sim-idade-max" type="number" step="0.5" min="30" max="120" required></div>
-            <div class="field"><label for="sim-seguros">Seguros obrigatórios (% ao mês sobre o saldo)</label><input id="sim-seguros" type="number" step="0.001" min="0" max="2" required></div>
-            <div class="field"><label for="sim-adm">Taxa de administração (R$ por mês)</label><input id="sim-adm" type="number" step="0.01" min="0" required></div>
-          </div>
-          <div class="form-row">
-            <div class="field"><label for="sim-cartorio">ITBI + cartório (% do valor do imóvel)</label><input id="sim-cartorio" type="number" step="0.1" min="0" max="30" required></div>
-            <div class="field"></div>
-          </div>
-          <div class="field" style="margin-bottom:6px;">
-            <label for="sim-aviso-texto">Aviso que aparece embaixo do resultado</label>
-            <textarea id="sim-aviso-texto" rows="2" maxlength="400"></textarea>
-          </div>
-        </div>
-
-        <div class="hero-actions" style="margin-top:20px;">
-          <button type="submit" class="btn btn-primary">Salvar regras do simulador</button>
-          <button type="button" id="sim-regras-padrao" class="btn btn-outline-navy">Voltar aos valores sugeridos</button>
-          <a href="simulador.html" target="_blank" rel="noopener" class="btn btn-outline-navy">Abrir o simulador ↗</a>
-        </div>
-        <p class="form-note" id="sim-regras-status" role="status"></p>
-      </form>
     </section>
 
     <section id="secao-config" class="admin-section" style="display:none;">

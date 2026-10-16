@@ -1147,60 +1147,7 @@ def _filtrar_config(dados):
     for campo in ('cor_principal', 'cor_destaque'):
         if campo in dados and COR_HEX.match(str(dados.get(campo) or '')):
             limpos[campo] = dados[campo].upper()
-    if isinstance(dados.get('simulador'), dict):
-        limpos['simulador'] = _filtrar_simulador(dados['simulador'])
     return limpos
-
-
-def _numero(valor, minimo, maximo, padrao):
-    try:
-        n = float(valor)
-    except (TypeError, ValueError):
-        return padrao
-    if n != n or n in (float('inf'), float('-inf')):
-        return padrao
-    n = max(minimo, min(maximo, n))
-    return int(n) if n == int(n) else round(n, 4)
-
-
-def _texto_curto(valor, padrao, limite=80):
-    texto = re.sub(r'\s+', ' ', str(valor or '')).strip()[:limite]
-    return texto or padrao
-
-
-def _filtrar_simulador(dados):
-    """Regras do simulador vindas do admin: só números dentro de limites razoáveis."""
-    p = store.SIMULADOR_PADRAO
-    faixas = []
-    for f in (dados.get('faixas') or [])[:8]:
-        if not isinstance(f, dict):
-            continue
-        faixas.append({
-            'nome': _texto_curto(f.get('nome'), f'Faixa {len(faixas) + 1}'),
-            'renda_max': _numero(f.get('renda_max'), 0, 1_000_000, 0),
-            'valor_max': _numero(f.get('valor_max'), 0, 50_000_000, 0),
-            'taxa': _numero(f.get('taxa'), 0, 40, 0),
-            'cota_max': _numero(f.get('cota_max'), 1, 100, 80),
-            'subsidio': _numero(f.get('subsidio'), 0, 1_000_000, 0),
-        })
-    faixas.sort(key=lambda f: f['renda_max'])
-    fora = dados.get('fora_programa') if isinstance(dados.get('fora_programa'), dict) else {}
-    return {
-        'sistema': 'PRICE' if str(dados.get('sistema', '')).upper() == 'PRICE' else 'SAC',
-        'comprometimento_renda': _numero(dados.get('comprometimento_renda'), 5, 100, p['comprometimento_renda']),
-        'prazo_max_anos': _numero(dados.get('prazo_max_anos'), 1, 50, p['prazo_max_anos']),
-        'idade_max_fim': _numero(dados.get('idade_max_fim'), 30, 120, p['idade_max_fim']),
-        'seguros_mensal_pct': _numero(dados.get('seguros_mensal_pct'), 0, 2, p['seguros_mensal_pct']),
-        'taxa_adm_mensal': _numero(dados.get('taxa_adm_mensal'), 0, 10_000, p['taxa_adm_mensal']),
-        'custos_cartorio_pct': _numero(dados.get('custos_cartorio_pct'), 0, 30, p['custos_cartorio_pct']),
-        'faixas': faixas,
-        'fora_programa': {
-            'nome': _texto_curto(fora.get('nome'), p['fora_programa']['nome']),
-            'taxa': _numero(fora.get('taxa'), 0, 40, p['fora_programa']['taxa']),
-            'cota_max': _numero(fora.get('cota_max'), 1, 100, p['fora_programa']['cota_max']),
-        },
-        'aviso': _texto_curto(dados.get('aviso'), p['aviso'], 400),
-    }
 
 
 @app.get('/api/configuracoes')
@@ -1358,8 +1305,6 @@ def _renderizar_pagina(nome, editar=False):
             soup.head.append(soup.new_tag('link', rel='stylesheet', href=_link_das_fontes(fontes_usadas)))
         dados_js = soup.new_tag('script')
         publico = {k: config[k] for k in ('whatsapp_numero', 'whatsapp_mensagem')}
-        if nome == 'simulador.html':
-            publico['simulador'] = config['simulador']
         dados_js.string = (f'window.RC_CONFIG={json_para_script(publico)};'
                            + ('window.RC_EDITANDO=true;' if editar else ''))
         soup.head.insert(0, dados_js)

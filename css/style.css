@@ -1863,22 +1863,7 @@ body.tema-escuro {
 .forca-senha span { display: block; height: 100%; width: 0; border-radius: 999px; transition: width .25s, background .25s; }
 .login-box { max-width: 420px; }
 
-/* ---------- Simulador: resultado detalhado ---------- */
-#sim-resultado .sim-linhas p, #sim-resultado .sim-parcela, #sim-resultado .sim-detalhe { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; }
-#sim-resultado .sim-linhas p { margin: 0 0 10px; }
-#sim-resultado .sim-linhas strong, #sim-resultado .sim-detalhe span:last-child { white-space: nowrap; }
-.sim-modalidade { display: inline-block; margin: 0 0 16px; padding: 6px 12px; border-radius: 999px; background: rgba(227, 5, 45, .08); color: var(--red) !important; font-weight: 700; font-size: .85rem; }
-#sim-resultado .sim-parcela { font-size: 1.2rem; margin: 0 0 10px; }
-#sim-resultado .sim-parcela strong { color: var(--red); }
-#sim-resultado .sim-detalhe { margin: 0 0 6px; color: var(--gray-500); font-size: .88rem; }
-#sim-resultado .sim-detalhe[hidden], #sim-resultado p[hidden] { display: none; }
-.sim-alertas { margin-top: 14px; display: grid; gap: 8px; }
-.sim-alertas[hidden] { display: none; }
-.sim-alertas p { margin: 0; padding: 10px 12px; border-radius: 10px; background: #fff6e0; border: 1px solid #f1d38a; color: #6b4e00 !important; font-size: .86rem; line-height: 1.45; }
-.sim-erro { margin: 0 0 14px; padding: 10px 12px; border-radius: 10px; background: #fdecee; color: #a3001d; font-size: .9rem; font-weight: 600; }
-.sim-erro[hidden] { display: none; }
-
-/* ---------- Admin: avisos, cartões do dashboard, modo edição, simulador ---------- */
+/* ---------- Admin: avisos, cartões do dashboard, modo edição ---------- */
 .admin-avisos { position: fixed; right: 18px; bottom: 18px; z-index: 6000; display: grid; gap: 10px; max-width: min(380px, calc(100vw - 36px)); }
 .admin-aviso { padding: 14px 16px; border-radius: 12px; background: #0f5132; color: #fff; font: 600 .92rem/1.4 var(--font-sub, 'Inter', sans-serif);
   box-shadow: 0 14px 34px rgba(0, 0, 0, .28); animation: avisoEntra .3s ease both; }
@@ -1890,11 +1875,3 @@ a.dash-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
 .form-card--editando { box-shadow: 0 0 0 2px var(--red), var(--shadow); }
 .form-row--3 { grid-template-columns: repeat(3, 1fr); }
 @media (max-width: 860px) { .form-row--3 { grid-template-columns: 1fr; } }
-.sim-faixas { min-width: 860px !important; }
-.sim-faixas td { padding: 8px 6px; vertical-align: middle; }
-.sim-faixas input { width: 100%; min-width: 90px; padding: 9px 10px; font-size: .9rem; }
-.sim-faixas td:first-child input { min-width: 220px; }
-#form-simulador, #form-simulador .field, #sim-resultado { min-width: 0; }
-#form-simulador select { width: 100%; max-width: 100%; text-overflow: ellipsis; }
-#form-simulador + div { min-width: 0; }
-@media (max-width: 480px) { #sim-resultado .sim-detalhe span:last-child { white-space: normal; text-align: right; } }

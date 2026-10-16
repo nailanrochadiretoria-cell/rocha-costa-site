@@ -705,7 +705,6 @@ async function carregarConfigAdmin() {
   document.getElementById('cfg-facebook').value = cfg.facebook_url || '';
   document.getElementById('cfg-cor-principal').value = cfg.cor_principal || CORES_ORIGINAIS.principal;
   document.getElementById('cfg-cor-destaque').value = cfg.cor_destaque || CORES_ORIGINAIS.destaque;
-  preencherFormSimulador(cfg.simulador || SIMULADOR_SUGERIDO);
 }
 
 function iniciarFormConfig() {
@@ -1078,136 +1077,6 @@ async function popularSelectEmpreendimentos() {
   select.value = valorAtual;
 }
 
-// ---- Seção: Simulador (regras usadas na página simulador.html) ----
-const SIMULADOR_SUGERIDO = {
-  sistema: 'SAC',
-  comprometimento_renda: 30,
-  prazo_max_anos: 35,
-  idade_max_fim: 80.5,
-  seguros_mensal_pct: 0.03,
-  taxa_adm_mensal: 25,
-  custos_cartorio_pct: 4,
-  faixas: [
-    { nome: 'Minha Casa Minha Vida - Faixa 1', renda_max: 2850, valor_max: 210000, taxa: 4.25, cota_max: 80, subsidio: 30000 },
-    { nome: 'Minha Casa Minha Vida - Faixa 2', renda_max: 4700, valor_max: 210000, taxa: 6.0, cota_max: 80, subsidio: 15000 },
-    { nome: 'Minha Casa Minha Vida - Faixa 3', renda_max: 8600, valor_max: 350000, taxa: 8.16, cota_max: 80, subsidio: 0 },
-    { nome: 'Minha Casa Minha Vida - Faixa 4', renda_max: 12000, valor_max: 500000, taxa: 10.5, cota_max: 80, subsidio: 0 },
-  ],
-  fora_programa: { nome: 'Financiamento bancário (SBPE)', taxa: 11.5, cota_max: 70 },
-  aviso: 'Estimativa com base nas regras atuais dos programas habitacionais. O valor final, a taxa e o desconto dependem da análise de crédito do banco.',
-};
-
-const _CAMPOS_FAIXA = [
-  ['nome', 'text', ''], ['renda_max', 'number', '1'], ['valor_max', 'number', '1000'],
-  ['taxa', 'number', '0.01'], ['cota_max', 'number', '1'], ['subsidio', 'number', '100'],
-];
-
-function _linhaFaixaHTML(f) {
-  const celulas = _CAMPOS_FAIXA.map(([campo, tipo, passo]) => {
-    const valor = f[campo] == null ? '' : f[campo];
-    const extra = tipo === 'number' ? ` type="number" min="0" step="${passo}" inputmode="decimal"` : ' type="text" maxlength="80"';
-    return `<td><input data-faixa="${campo}"${extra} value="${escHTML(valor)}" required aria-label="${campo}"></td>`;
-  }).join('');
-  return `<tr>${celulas}<td><button type="button" class="btn btn-sm btn-outline-navy" data-remover-faixa aria-label="Remover faixa">Remover</button></td></tr>`;
-}
-
-function preencherFormSimulador(s) {
-  const tbody = document.getElementById('sim-faixas-tbody');
-  if (!tbody) return;
-  tbody.innerHTML = (s.faixas || []).map(_linhaFaixaHTML).join('');
-  const val = (id, v) => { document.getElementById(id).value = v == null ? '' : v; };
-  val('sim-fora-nome', s.fora_programa?.nome);
-  val('sim-fora-taxa', s.fora_programa?.taxa);
-  val('sim-fora-cota', s.fora_programa?.cota_max);
-  val('sim-sistema-padrao', s.sistema === 'PRICE' ? 'PRICE' : 'SAC');
-  val('sim-comprometimento', s.comprometimento_renda);
-  val('sim-prazo-max', s.prazo_max_anos);
-  val('sim-idade-max', s.idade_max_fim);
-  val('sim-seguros', s.seguros_mensal_pct);
-  val('sim-adm', s.taxa_adm_mensal);
-  val('sim-cartorio', s.custos_cartorio_pct);
-  val('sim-aviso-texto', s.aviso);
-}
-
-function lerFormSimulador() {
-  const num = (id) => Number(document.getElementById(id).value);
-  const faixas = [...document.querySelectorAll('#sim-faixas-tbody tr')].map((tr) => {
-    const f = {};
-    _CAMPOS_FAIXA.forEach(([campo, tipo]) => {
-      const v = tr.querySelector(`[data-faixa="${campo}"]`).value.trim();
-      f[campo] = tipo === 'number' ? Number(v) : v;
-    });
-    return f;
-  });
-  return {
-    sistema: document.getElementById('sim-sistema-padrao').value,
-    comprometimento_renda: num('sim-comprometimento'),
-    prazo_max_anos: num('sim-prazo-max'),
-    idade_max_fim: num('sim-idade-max'),
-    seguros_mensal_pct: num('sim-seguros'),
-    taxa_adm_mensal: num('sim-adm'),
-    custos_cartorio_pct: num('sim-cartorio'),
-    faixas,
-    fora_programa: {
-      nome: document.getElementById('sim-fora-nome').value.trim(),
-      taxa: num('sim-fora-taxa'),
-      cota_max: num('sim-fora-cota'),
-    },
-    aviso: document.getElementById('sim-aviso-texto').value.trim(),
-  };
-}
-
-function iniciarFormSimulador() {
-  const form = document.getElementById('form-simulador-regras');
-  if (!form) return;
-  const tbody = document.getElementById('sim-faixas-tbody');
-  const status = document.getElementById('sim-regras-status');
-
-  document.getElementById('sim-faixa-adicionar').addEventListener('click', () => {
-    if (tbody.children.length >= 8) {
-      avisar('O simulador aceita no máximo 8 faixas.', 'erro');
-      return;
-    }
-    tbody.insertAdjacentHTML('beforeend', _linhaFaixaHTML({ nome: '', renda_max: '', valor_max: '', taxa: '', cota_max: 80, subsidio: 0 }));
-    tbody.lastElementChild.querySelector('input').focus();
-  });
-  tbody.addEventListener('click', (e) => {
-    const botao = e.target.closest('[data-remover-faixa]');
-    if (botao) botao.closest('tr').remove();
-  });
-  document.getElementById('sim-regras-padrao').addEventListener('click', () => {
-    if (!confirm('Trocar todos os campos pelos valores sugeridos? (Só vale depois de clicar em "Salvar regras do simulador".)')) return;
-    preencherFormSimulador(SIMULADOR_SUGERIDO);
-    status.textContent = 'Valores sugeridos colocados. Confira e clique em "Salvar regras do simulador".';
-  });
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    status.textContent = '';
-    const invalido = [...form.querySelectorAll('input, select, textarea')].find((el) => !el.checkValidity());
-    if (invalido) {
-      invalido.reportValidity();
-      return;
-    }
-    const dados = lerFormSimulador();
-    const rendas = dados.faixas.map((f) => f.renda_max);
-    if (new Set(rendas).size !== rendas.length) {
-      avisar('Duas faixas estão com a mesma "Renda até". Cada faixa precisa de um limite de renda diferente.', 'erro');
-      return;
-    }
-    await comBotaoOcupado(form, async () => {
-      try {
-        const cfg = await apiAuth('/api/configuracoes', 'PUT', { simulador: dados });
-        preencherFormSimulador(cfg.simulador);
-        avisar('Regras do simulador salvas! Já valem no site.');
-      } catch (err) {
-        if (err.sessaoExpirada) return tratarSessaoExpirada();
-        avisar(err.message, 'erro');
-      }
-    });
-  });
-}
-
 // ---- Dashboard ----
 async function renderAdminDashboard() {
   const el = document.getElementById('dash-imoveis-total');
@@ -1377,7 +1246,6 @@ function iniciarPainelAdmin() {
   iniciarFormBlog();
   iniciarFormConfig();
   iniciarFormAcesso();
-  iniciarFormSimulador();
   iniciarEditorPaginas();
   iniciarNavegacaoAdmin(); // por último: pode abrir direto a aba que estava no endereço
 }
